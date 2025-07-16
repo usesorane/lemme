@@ -29,6 +29,13 @@ class LemmeCommand extends Command
         // Create sample documentation files
         $this->createSampleFiles($docsDirectory);
 
+        // Publish assets
+        $this->call('vendor:publish', [
+            '--tag' => 'lemme-assets',
+            '--force' => $this->option('force'),
+        ]);
+        $this->info('Published Lemme assets');
+
         // Clear cache if enabled
         if (config('lemme.cache.enabled')) {
             Lemme::clearCache();

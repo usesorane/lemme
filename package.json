@@ -1,0 +1,15 @@
+{
+    "name": "lemme-assets",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "vite build --watch",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "@tailwindcss/typography": "^0.5.16",
+        "@tailwindcss/vite": "^4.1.11",
+        "tailwindcss": "^4.1.11",
+        "vite": "^6.0.0"
+    }
+}

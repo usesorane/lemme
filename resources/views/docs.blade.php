@@ -6,8 +6,13 @@
     <title>{{ $page['title'] }} - {{ $siteTitle }}</title>
     <meta name="description" content="{{ $siteDescription }}">
     
-    <!-- Tailwind CSS 4 -->
-    <script src="https://cdn.tailwindcss.com/4.0.0-alpha.28/tailwindcss.js"></script>
+    <!-- Tailwind CSS 4 (compiled) -->
+    <link rel="stylesheet" href="{{ asset('vendor/lemme/app.css') }}">
+    
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Alpine.js for interactivity -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -96,7 +101,7 @@
             <!-- Content -->
             <main class="flex-1 overflow-y-auto custom-scrollbar">
                 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <article class="prose max-w-none">
+                    <article class="prose prose-lg max-w-none prose-headings:font-semibold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-code:bg-gray-100 prose-code:text-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-gray-900 prose-pre:text-gray-100">
                         <x-markdown>
                             {!! $page['raw_content'] !!}
                         </x-markdown>

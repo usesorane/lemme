@@ -16,6 +16,7 @@ class LemmeServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             ->hasViews()
             ->hasRoute('web')
+            ->hasAssets()
             ->hasCommands(
                 LemmeCommand::class,
                 LemmeClearCommand::class

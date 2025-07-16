@@ -21,10 +21,11 @@ Install the package via Composer:
 composer require usesorane/lemme
 ```
 
-Publish the config file (optional):
+Publish the config and assets:
 
 ```bash
 php artisan vendor:publish --tag="lemme-config"
+php artisan vendor:publish --tag="lemme-assets"
 ```
 
 Install the documentation system:
@@ -36,6 +37,7 @@ php artisan lemme:install
 This will:
 - Create a `docs` directory in your project root
 - Generate sample documentation files
+- Publish the compiled Tailwind CSS assets
 - Set up the necessary configuration
 
 ## Configuration
@@ -204,6 +206,25 @@ For Nginx:
 ```nginx
 server_name yoursite.com docs.yoursite.com;
 ```
+
+## Development
+
+If you're contributing to Lemme or want to customize the styles:
+
+### Building Assets
+
+```bash
+# Install dependencies
+bun install
+
+# Build for development (with watching)
+bun run dev
+
+# Build for production
+bun run build
+```
+
+The compiled CSS will be generated in the `dist/` directory and can be published to Laravel projects.
 
 ## Contributing
 
