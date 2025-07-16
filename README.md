@@ -1,84 +1,215 @@
-# This is my package lemme
+# Lemme - Laravel Documentation Generator
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/usesorane/lemme.svg?style=flat-square)](https://packagist.org/packages/usesorane/lemme)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/usesorane/lemme/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/usesorane/lemme/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/usesorane/lemme/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/usesorane/lemme/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/usesorane/lemme.svg?style=flat-square)](https://packagist.org/packages/usesorane/lemme)
+Lemme is a Laravel package that facilitates the creation of beautiful documentation websites from Markdown files. It provides a simple way to turn your project's documentation into a fully-featured website with a modern, responsive design.
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+## Features
 
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/lemme.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/lemme)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+- 📝 **Markdown-based**: Write your documentation in simple Markdown files
+- 🎨 **Beautiful UI**: Modern design with Tailwind CSS 4
+- 📱 **Responsive**: Works perfectly on all devices
+- ⚡ **Fast**: Built-in caching for optimal performance
+- 🎯 **Flexible routing**: Use subdomains or route prefixes
+- 🔧 **Configurable**: Customize themes, directories, and more
+- 🚀 **Laravel-native**: Seamlessly integrates with your Laravel application
+- ✨ **Syntax highlighting**: Automatic code highlighting with Spatie Laravel Markdown
 
 ## Installation
 
-You can install the package via composer:
+Install the package via Composer:
 
 ```bash
 composer require usesorane/lemme
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="lemme-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
+Publish the config file:
 
 ```bash
 php artisan vendor:publish --tag="lemme-config"
 ```
 
-This is the contents of the published config file:
+Install the documentation system:
+
+```bash
+php artisan lemme:install
+```
+
+This will:
+- Create a `docs` directory in your project root
+- Generate sample documentation files
+- Set up the necessary configuration
+
+## Configuration
+
+Edit `config/lemme.php` to customize your documentation:
 
 ```php
 return [
+    // Directory where your markdown files are stored
+    'docs_directory' => env('LEMME_DOCS_DIRECTORY', 'docs'),
+
+    // Subdomain for documentation (e.g., docs.yoursite.com)
+    'subdomain' => env('LEMME_SUBDOMAIN', 'docs'),
+
+    // Alternative: use route prefix instead of subdomain
+    'route_prefix' => env('LEMME_ROUTE_PREFIX', null),
+
+    // Theme configuration
+    'theme' => env('LEMME_THEME', 'default'),
+
+    // Site information
+    'site_title' => env('LEMME_SITE_TITLE', 'Documentation'),
+    'site_description' => env('LEMME_SITE_DESCRIPTION', 'Project Documentation'),
+
+    // Navigation settings
+    'navigation' => [
+        'auto_generate' => true,
+        'sort_by' => 'filename', // 'filename', 'title', 'created_at', 'modified_at'
+        'sort_direction' => 'asc',
+    ],
+
+    // Cache settings
+    'cache' => [
+        'enabled' => env('LEMME_CACHE_ENABLED', true),
+        'ttl' => env('LEMME_CACHE_TTL', 3600),
+    ],
 ];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="lemme-views"
 ```
 
 ## Usage
 
+### Creating Documentation
+
+1. **Create Markdown files** in your configured docs directory (default: `docs/`)
+2. **Add frontmatter** to set page metadata (optional):
+
+```markdown
+---
+title: Getting Started
+description: Learn how to get started with our project
+---
+
+# Getting Started
+
+Your content here...
+```
+
+3. **Organize in folders** for better structure:
+
+```
+docs/
+├── index.md
+├── getting-started.md
+├── guides/
+│   ├── installation.md
+│   └── configuration.md
+└── api/
+    ├── authentication.md
+    └── endpoints.md
+```
+
+### Accessing Documentation
+
+By default, your documentation will be available at:
+
+- **Subdomain**: `https://docs.yoursite.com` (if using subdomain routing)
+- **Route prefix**: `https://yoursite.com/docs` (if using route prefix)
+
+### API Access
+
+Lemme also provides JSON API endpoints:
+
+- `GET /api` - Get all pages and navigation
+- `GET /api/{slug}` - Get a specific page
+
+### Commands
+
+- `php artisan lemme:install` - Install and set up documentation
+- `php artisan lemme:install --force` - Reinstall and overwrite existing files
+- `php artisan lemme:clear` - Clear documentation cache
+
+### Using the Facade
+
+You can also interact with Lemme programmatically:
+
 ```php
-$lemme = new Sorane\Lemme();
-echo $lemme->echoPhrase('Hello, Sorane!');
+use Sorane\Lemme\Facades\Lemme;
+
+// Get all documentation pages
+$pages = Lemme::getPages();
+
+// Get a specific page
+$page = Lemme::getPage('getting-started');
+
+// Get navigation structure
+$navigation = Lemme::getNavigation();
+
+// Clear cache
+Lemme::clearCache();
 ```
 
-## Testing
+## Themes
 
-```bash
-composer test
+Lemme comes with a beautiful default theme built with Tailwind CSS 4. The theme features:
+
+- Clean, modern design
+- Responsive layout
+- Mobile-friendly navigation
+- Syntax highlighting for code blocks
+- Automatic page navigation
+- Search-friendly structure
+
+The syntax highlighting is powered by **Spatie Laravel Markdown** and supports:
+
+- PHP, JavaScript, Python, Ruby, Go, Rust
+- HTML, CSS, SCSS, JSON, YAML, XML  
+- Bash, SQL, Docker, and many more!
+
+Simply use triple backticks with the language identifier:
+
+````markdown
+```php
+<?php echo "Hello, World!"; ?>
+```
+````
+
+## Performance
+
+Lemme includes built-in caching to ensure your documentation loads quickly:
+
+- Pages are cached automatically
+- Cache respects file modification times
+- Easy cache clearing via command or facade
+- Configurable cache TTL
+
+## Subdomain Setup
+
+To use subdomain routing (e.g., `docs.yoursite.com`):
+
+1. **Configure DNS**: Add a CNAME record pointing `docs` to your main domain
+2. **Set up web server**: Configure your web server to handle the subdomain
+3. **Update config**: Set `LEMME_SUBDOMAIN=docs` in your `.env` file
+
+For Apache, add to your virtual host:
+```apache
+ServerAlias docs.yoursite.com
 ```
 
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+For Nginx:
+```nginx
+server_name yoursite.com docs.yoursite.com;
+```
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
-## Credits
-
-- [Rutger Broerze](https://github.com/usesorane)
-- [All Contributors](../../contributors)
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+
+## Credits
+
+- **Author**: Rutger Broerze
+- **Built with**: Laravel, Tailwind CSS, Alpine.js
+- **Markdown parsing**: Spatie Laravel Markdown (with syntax highlighting)
+- **Frontmatter parsing**: Spatie YAML Front Matter

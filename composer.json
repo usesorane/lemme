@@ -1,10 +1,15 @@
 {
     "name": "usesorane/lemme",
-    "description": "This is my package lemme",
+    "description": "Laravel package for generating documentation websites from Markdown files",
     "keywords": [
-        "Sorane",
         "laravel",
-        "lemme"
+        "documentation",
+        "markdown",
+        "docs",
+        "website",
+        "generator",
+        "lemme",
+        "sorane"
     ],
     "homepage": "https://github.com/usesorane/lemme",
     "license": "MIT",
@@ -17,8 +22,10 @@
     ],
     "require": {
         "php": "^8.4",
+        "illuminate/contracts": "^10.0||^11.0||^12.0",
+        "spatie/laravel-markdown": "^2.7",
         "spatie/laravel-package-tools": "^1.16",
-        "illuminate/contracts": "^10.0||^11.0||^12.0"
+        "spatie/yaml-front-matter": "^2.0"
     },
     "require-dev": {
         "laravel/pint": "^1.14",
