@@ -11,7 +11,7 @@ Lemme is a Laravel package that facilitates the creation of beautiful documentat
 - 🎯 **Flexible routing**: Use subdomains or route prefixes
 - 🔧 **Configurable**: Customize themes, directories, and more
 - 🚀 **Laravel-native**: Seamlessly integrates with your Laravel application
-- ✨ **Syntax highlighting**: Automatic code highlighting with Spatie Laravel Markdown
+- ✨ **Syntax highlighting**: Automatic code highlighting powered by Shiki
 
 ## Installation
 
@@ -21,7 +21,7 @@ Install the package via Composer:
 composer require usesorane/lemme
 ```
 
-Publish the config file:
+Publish the config file (optional):
 
 ```bash
 php artisan vendor:publish --tag="lemme-config"
@@ -40,7 +40,7 @@ This will:
 
 ## Configuration
 
-Edit `config/lemme.php` to customize your documentation:
+Use the environment variables or edit `config/lemme.php` to customize your documentation website:
 
 ```php
 return [
@@ -116,10 +116,16 @@ By default, your documentation will be available at:
 
 ### API Access
 
-Lemme also provides JSON API endpoints:
+Lemme provides JSON API endpoints for headless usage:
 
 - `GET /api` - Get all pages and navigation
 - `GET /api/{slug}` - Get a specific page
+
+**Example use cases:**
+- Build custom documentation frontends
+- Create mobile apps or SPAs
+- Integrate with external tools or chatbots
+- Generate documentation reports
 
 ### Commands
 
@@ -158,7 +164,7 @@ Lemme comes with a beautiful default theme built with Tailwind CSS 4. The theme 
 - Automatic page navigation
 - Search-friendly structure
 
-The syntax highlighting is powered by **Spatie Laravel Markdown** and supports:
+The syntax highlighting is powered by **Shiki** and supports:
 
 - PHP, JavaScript, Python, Ruby, Go, Rust
 - HTML, CSS, SCSS, JSON, YAML, XML  
@@ -211,5 +217,5 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 
 - **Author**: Rutger Broerze
 - **Built with**: Laravel, Tailwind CSS, Alpine.js
-- **Markdown parsing**: Spatie Laravel Markdown (with syntax highlighting)
+- **Markdown parsing**: Spatie Laravel Markdown (with Shiki syntax highlighting)
 - **Frontmatter parsing**: Spatie YAML Front Matter

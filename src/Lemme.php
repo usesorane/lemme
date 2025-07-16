@@ -15,14 +15,14 @@ class Lemme
     public function getPages(): Collection
     {
         $cacheKey = 'lemme.pages';
-        
+
         if (config('lemme.cache.enabled') && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
 
         $docsPath = base_path(config('lemme.docs_directory', 'docs'));
-        
-        if (!File::exists($docsPath)) {
+
+        if (! File::exists($docsPath)) {
             return collect();
         }
 
@@ -56,10 +56,10 @@ class Lemme
         try {
             $content = File::get($filepath);
             $document = YamlFrontMatter::parse($content);
-            
-            $relativePath = str_replace(base_path(config('lemme.docs_directory', 'docs')) . '/', '', $filepath);
+
+            $relativePath = str_replace(base_path(config('lemme.docs_directory', 'docs')).'/', '', $filepath);
             $slug = $this->generateSlug($relativePath);
-            
+
             return [
                 'title' => $document->matter('title') ?? $this->generateTitleFromPath($relativePath),
                 'slug' => $slug,
@@ -83,7 +83,7 @@ class Lemme
         $slug = str_replace(['/', '.md'], ['-', ''], $path);
         $slug = preg_replace('/[^a-zA-Z0-9\-_]/', '', $slug);
         $slug = strtolower(trim($slug, '-'));
-        
+
         return $slug === 'index' ? '' : $slug;
     }
 
@@ -93,6 +93,7 @@ class Lemme
     protected function generateTitleFromPath(string $path): string
     {
         $filename = pathinfo($path, PATHINFO_FILENAME);
+
         return ucwords(str_replace(['-', '_'], ' ', $filename));
     }
 
@@ -103,7 +104,7 @@ class Lemme
     {
         $sortBy = config('lemme.navigation.sort_by', 'filename');
         $direction = config('lemme.navigation.sort_direction', 'asc');
-        
+
         return match ($sortBy) {
             'title' => fn ($page) => $direction === 'asc' ? $page['title'] : $page['title'] * -1,
             'created_at' => fn ($page) => $direction === 'asc' ? $page['created_at'] : $page['created_at'] * -1,
@@ -132,11 +133,11 @@ class Lemme
     public function getPageUrl(string $slug): string
     {
         $prefix = config('lemme.route_prefix');
-        
+
         if ($prefix) {
-            return url($prefix . '/' . $slug);
+            return url($prefix.'/'.$slug);
         }
-        
+
         return url($slug);
     }
 

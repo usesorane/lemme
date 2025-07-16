@@ -14,23 +14,23 @@ class DocsController extends Controller
     public function show(Request $request, string $slug = '')
     {
         $pages = Lemme::getPages();
-        
+
         if (empty($slug)) {
             // Try to find an index page, otherwise show the first page
             $page = $pages->first(fn ($p) => $p['slug'] === '');
-            if (!$page) {
+            if (! $page) {
                 $page = $pages->first();
             }
         } else {
             $page = Lemme::getPage($slug);
         }
-        
-        if (!$page) {
+
+        if (! $page) {
             abort(404, 'Documentation page not found');
         }
-        
+
         $navigation = Lemme::getNavigation();
-        
+
         return view('lemme::docs', [
             'page' => $page,
             'pages' => $pages,
@@ -40,7 +40,7 @@ class DocsController extends Controller
             'theme' => config('lemme.theme', 'default'),
         ]);
     }
-    
+
     /**
      * API endpoint to get all pages as JSON
      */
@@ -51,18 +51,18 @@ class DocsController extends Controller
             'navigation' => Lemme::getNavigation(),
         ]);
     }
-    
+
     /**
      * API endpoint to get a specific page as JSON
      */
     public function apiPage(Request $request, string $slug)
     {
         $page = Lemme::getPage($slug);
-        
-        if (!$page) {
+
+        if (! $page) {
             return response()->json(['error' => 'Page not found'], 404);
         }
-        
+
         return response()->json(['page' => $page]);
     }
 }

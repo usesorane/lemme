@@ -17,9 +17,9 @@ class LemmeCommand extends Command
         $this->info('Installing Lemme documentation system...');
 
         $docsDirectory = base_path(config('lemme.docs_directory', 'docs'));
-        
+
         // Create docs directory if it doesn't exist
-        if (!File::exists($docsDirectory)) {
+        if (! File::exists($docsDirectory)) {
             File::makeDirectory($docsDirectory, 0755, true);
             $this->info("Created directory: {$docsDirectory}");
         } else {
@@ -38,15 +38,15 @@ class LemmeCommand extends Command
         $this->newLine();
         $this->info('Lemme installation completed successfully!');
         $this->newLine();
-        
+
         $this->line('Next steps:');
-        $this->line('1. Add your markdown files to the ' . config('lemme.docs_directory', 'docs') . ' directory');
+        $this->line('1. Add your markdown files to the '.config('lemme.docs_directory', 'docs').' directory');
         $this->line('2. Configure your subdomain or route prefix in config/lemme.php');
-        
+
         if (config('lemme.subdomain')) {
-            $this->line('3. Your documentation will be available at: ' . config('lemme.subdomain') . '.' . parse_url(config('app.url'), PHP_URL_HOST));
+            $this->line('3. Your documentation will be available at: '.config('lemme.subdomain').'.'.parse_url(config('app.url'), PHP_URL_HOST));
         } else {
-            $this->line('3. Your documentation will be available at: ' . url('docs'));
+            $this->line('3. Your documentation will be available at: '.url('docs'));
         }
 
         return self::SUCCESS;
@@ -54,15 +54,15 @@ class LemmeCommand extends Command
 
     protected function createSampleFiles(string $docsDirectory): void
     {
-        $indexFile = $docsDirectory . '/index.md';
-        $gettingStartedFile = $docsDirectory . '/getting-started.md';
+        $indexFile = $docsDirectory.'/index.md';
+        $gettingStartedFile = $docsDirectory.'/getting-started.md';
 
-        if (!File::exists($indexFile) || $this->option('force')) {
+        if (! File::exists($indexFile) || $this->option('force')) {
             File::put($indexFile, $this->getIndexContent());
             $this->info('Created: index.md');
         }
 
-        if (!File::exists($gettingStartedFile) || $this->option('force')) {
+        if (! File::exists($gettingStartedFile) || $this->option('force')) {
             File::put($gettingStartedFile, $this->getGettingStartedContent());
             $this->info('Created: getting-started.md');
         }

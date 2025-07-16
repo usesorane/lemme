@@ -14,7 +14,7 @@ class LemmeClearCommand extends Command
     public function handle(): int
     {
         Lemme::clearCache();
-        
+
         $this->info('Documentation cache cleared successfully!');
 
         return self::SUCCESS;

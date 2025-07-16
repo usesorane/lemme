@@ -26,7 +26,7 @@ class LemmeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Set up test docs directory
         $this->app['config']->set('lemme.docs_directory', 'tests/docs');
         $this->app['config']->set('lemme.cache.enabled', false);
@@ -38,14 +38,14 @@ class LemmeTest extends TestCase
         if (File::exists(base_path('tests/docs'))) {
             File::deleteDirectory(base_path('tests/docs'));
         }
-        
+
         parent::tearDown();
     }
 
     public function test_it_can_get_empty_pages_collection()
     {
         $pages = Lemme::getPages();
-        
+
         $this->assertInstanceOf(\Illuminate\Support\Collection::class, $pages);
         $this->assertEmpty($pages);
     }
@@ -55,8 +55,8 @@ class LemmeTest extends TestCase
         // Create test docs directory and file
         $docsPath = base_path('tests/docs');
         File::ensureDirectoryExists($docsPath);
-        
-        File::put($docsPath . '/test.md', <<<'MD'
+
+        File::put($docsPath.'/test.md', <<<'MD'
 ---
 title: Test Page
 description: A test page
@@ -68,7 +68,7 @@ This is a test page with some content.
 MD);
 
         $pages = Lemme::getPages();
-        
+
         $this->assertCount(1, $pages);
         $this->assertEquals('Test Page', $pages->first()['title']);
         $this->assertEquals('test', $pages->first()['slug']);
@@ -80,8 +80,8 @@ MD);
         // Create test docs directory and file
         $docsPath = base_path('tests/docs');
         File::ensureDirectoryExists($docsPath);
-        
-        File::put($docsPath . '/getting-started.md', <<<'MD'
+
+        File::put($docsPath.'/getting-started.md', <<<'MD'
 ---
 title: Getting Started
 ---
@@ -90,7 +90,7 @@ title: Getting Started
 MD);
 
         $page = Lemme::getPage('getting-started');
-        
+
         $this->assertNotNull($page);
         $this->assertEquals('Getting Started', $page['title']);
         $this->assertEquals('getting-started', $page['slug']);
@@ -101,8 +101,8 @@ MD);
         // Create test docs directory and files
         $docsPath = base_path('tests/docs');
         File::ensureDirectoryExists($docsPath);
-        
-        File::put($docsPath . '/index.md', <<<'MD'
+
+        File::put($docsPath.'/index.md', <<<'MD'
 ---
 title: Home
 ---
@@ -110,7 +110,7 @@ title: Home
 # Home Page
 MD);
 
-        File::put($docsPath . '/about.md', <<<'MD'
+        File::put($docsPath.'/about.md', <<<'MD'
 ---
 title: About
 ---
@@ -119,7 +119,7 @@ title: About
 MD);
 
         $navigation = Lemme::getNavigation();
-        
+
         $this->assertCount(2, $navigation);
         $this->assertEquals('About', $navigation->first()['title']);
         $this->assertEquals('Home', $navigation->last()['title']);
