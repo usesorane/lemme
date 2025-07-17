@@ -9,153 +9,89 @@
     <!-- Tailwind CSS 4 (compiled) -->
     <link rel="stylesheet" href="{{ asset('vendor/lemme/app.css') }}">
     
-    <!-- Google Fonts for better typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Alpine.js for interactivity -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
     <style>
         [x-cloak] { display: none !important; }
-        
-        /* Custom scrollbar */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgb(156 163 175);
-            border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgb(107 114 128);
-        }
-        
-        /* Content styles */
-        .prose h1 { @apply text-3xl font-bold text-gray-900 mb-6 mt-8; }
-        .prose h2 { @apply text-2xl font-semibold text-gray-900 mb-4 mt-6; }
-        .prose h3 { @apply text-xl font-semibold text-gray-900 mb-3 mt-5; }
-        .prose h4 { @apply text-lg font-medium text-gray-900 mb-2 mt-4; }
-        .prose p { @apply text-gray-700 mb-4 leading-relaxed; }
-        .prose ul { @apply list-disc pl-6 mb-4; }
-        .prose ol { @apply list-decimal pl-6 mb-4; }
-        .prose li { @apply mb-1; }
-        .prose a { @apply text-blue-600 hover:text-blue-800 underline; }
-        .prose code { @apply bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-sm; }
-        .prose pre { @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4; }
-        .prose pre code { @apply bg-transparent text-inherit px-0 py-0; }
-        .prose blockquote { @apply border-l-4 border-blue-500 pl-4 italic text-gray-600 mb-4; }
-        .prose table { @apply w-full border-collapse border border-gray-300 mb-4; }
-        .prose th { @apply border border-gray-300 bg-gray-100 px-4 py-2 text-left font-semibold; }
-        .prose td { @apply border border-gray-300 px-4 py-2; }
     </style>
 </head>
-<body class="h-full bg-gray-50 font-sans">
-    <div x-data="{ sidebarOpen: false }" class="flex h-full">
-        <!-- Sidebar -->
-        <div :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
-             class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0">
-            <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-                <h1 class="text-xl font-bold text-gray-900">{{ $siteTitle }}</h1>
-                <button @click="sidebarOpen = false" class="lg:hidden">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            
-            <nav class="flex-1 px-4 py-6 overflow-y-auto custom-scrollbar">
-                <ul class="space-y-1">
-                    @foreach($navigation as $item)
-                        <li>
-                            <a href="{{ $item['url'] }}" 
-                               class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 
-                                      {{ $page['slug'] === $item['slug'] ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
-                                {{ $item['title'] }}
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            </nav>
-        </div>
-        
-        <!-- Main content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Header -->
-            <header class="bg-white shadow-sm border-b border-gray-200 lg:hidden">
-                <div class="flex items-center justify-between h-16 px-4">
-                    <button @click="sidebarOpen = true" class="text-gray-500 hover:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                    <h1 class="text-lg font-semibold text-gray-900">{{ $page['title'] }}</h1>
-                    <div></div>
+<body class="flex min-h-full bg-white antialiased dark:bg-zinc-900">
+
+    <div class="w-full">
+        <div class="h-full lg:ml-72 xl:ml-80">
+            <header class="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex">
+                <div class="contents lg:pointer-events-auto lg:block lg:w-72 lg:overflow-y-auto lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pt-4 lg:pb-8 xl:w-80 lg:dark:border-white/10">
+                    <div class="hidden lg:flex">
+                        LOGO
+                    </div>
+                    <div class="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-12 px-4 transition sm:px-6 lg:left-72 lg:z-30 lg:px-8 xl:left-80 backdrop-blur-xs lg:left-72 xl:left-80 dark:backdrop-blur-sm bg-white/(--bg-opacity-light) dark:bg-zinc-900/(--bg-opacity-dark)">
+                        TOP NAVIGATION
+                    </div>
+                    <nav class="hidden lg:mt-10 lg:block">
+                        <ul>
+                            @foreach($navigation as $item)
+                            <li>
+                                <a href="{{ $item['url'] }}" 
+                                class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 
+                                        {{ $page['slug'] === $item['slug'] ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                                    {{ $item['title'] }}
+                                </a>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </nav>
                 </div>
             </header>
-            
-            <!-- Content -->
-            <main class="flex-1 overflow-y-auto custom-scrollbar">
-                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <article class="prose prose-lg max-w-none prose-headings:font-semibold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-code:bg-gray-100 prose-code:text-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-gray-900 prose-pre:text-gray-100">
-                        <x-markdown>
+            <div class="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
+                <main class="flex-auto">
+                    <article class="flex h-full flex-col pt-16 pb-10">
+                        <x-markdown class="flex-auto prose dark:prose-invert mx-auto max-w-2xl lg:max-w-3xl">
                             {!! $page['raw_content'] !!}
                         </x-markdown>
+                        <footer class="mx-auto mt-16 w-full max-w-2xl lg:max-w-5xl">
+                        </footer>
                     </article>
-                    
-                    <!-- Page navigation -->
-                    @if($pages->count() > 1)
-                        <nav class="flex items-center justify-between border-t border-gray-200 mt-12 pt-6">
-                            @php
-                                $currentIndex = $pages->search(fn($p) => $p['slug'] === $page['slug']);
-                                $prevPage = $currentIndex > 0 ? $pages[$currentIndex - 1] : null;
-                                $nextPage = $currentIndex < $pages->count() - 1 ? $pages[$currentIndex + 1] : null;
-                            @endphp
-                            
-                            <div class="flex-1">
-                                @if($prevPage)
-                                    <a href="{{ Sorane\Lemme\Facades\Lemme::getPageUrl($prevPage['slug']) }}" 
-                                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                        </svg>
-                                        {{ $prevPage['title'] }}
-                                    </a>
-                                @endif
-                            </div>
-                            
-                            <div class="flex-1 text-right">
-                                @if($nextPage)
-                                    <a href="{{ Sorane\Lemme\Facades\Lemme::getPageUrl($nextPage['slug']) }}" 
-                                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                                        {{ $nextPage['title'] }}
-                                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    </a>
-                                @endif
-                            </div>
-                        </nav>
-                    @endif
-                </div>
-            </main>
+                </main>
+                <footer class="mx-auto w-full max-w-2xl space-y-10 pb-16 lg:max-w-5xl">
+                    <div class="flex">
+                        <div class="ml-auto flex flex-col items-end gap-3">
+                            <!-- Page navigation -->
+                            @if($pages->count() > 1)
+                                <nav class="flex items-center justify-between border-t border-gray-200 mt-12 pt-6">
+                                    @php
+                                        $currentIndex = $pages->search(fn($p) => $p['slug'] === $page['slug']);
+                                        $prevPage = $currentIndex > 0 ? $pages[$currentIndex - 1] : null;
+                                        $nextPage = $currentIndex < $pages->count() - 1 ? $pages[$currentIndex + 1] : null;
+                                    @endphp
+                                    
+                                    <div class="flex-1">
+                                        @if($prevPage)
+                                            <a href="{{ Sorane\Lemme\Facades\Lemme::getPageUrl($prevPage['slug']) }}" 
+                                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                </svg>
+                                                {{ $prevPage['title'] }}
+                                            </a>
+                                        @endif
+                                    </div>
+                                    
+                                    <div class="flex-1 text-right">
+                                        @if($nextPage)
+                                            <a href="{{ Sorane\Lemme\Facades\Lemme::getPageUrl($nextPage['slug']) }}" 
+                                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                                {{ $nextPage['title'] }}
+                                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </a>
+                                        @endif
+                                    </div>
+                                </nav>
+                            @endif
+                        </div>
+                    </div>
+                </footer>
+            </div>
         </div>
     </div>
-    
-    <!-- Mobile sidebar overlay -->
-    <div x-show="sidebarOpen" 
-         x-transition:enter="transition-opacity ease-linear duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-300"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
-         x-cloak
-         @click="sidebarOpen = false"></div>
 </body>
 </html>

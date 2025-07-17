@@ -29,10 +29,16 @@ class LemmeCommand extends Command
         // Create sample documentation files
         $this->createSampleFiles($docsDirectory);
 
+        $forcePublishAssets = true;
+
+        if ($this->option('force') === false) {
+            $forcePublishAssets = false;
+        }
+
         // Publish assets
         $this->call('vendor:publish', [
             '--tag' => 'lemme-assets',
-            '--force' => $this->option('force'),
+            '--force' => $forcePublishAssets,
         ]);
         $this->info('Published Lemme assets');
 
