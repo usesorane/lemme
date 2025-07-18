@@ -60,10 +60,17 @@ class Lemme
             $relativePath = str_replace(base_path(config('lemme.docs_directory', 'docs')).'/', '', $filepath);
             $slug = $this->generateSlug($relativePath);
 
+            $markdownContent = $document->body();
+            $headings = $this->extractHeadings($markdownContent);
+
+            // Inject IDs into the markdown content for the headings
+            $markdownWithIds = $this->injectHeadingIds($markdownContent, $headings);
+
             return [
                 'title' => $document->matter('title') ?? $this->generateTitleFromPath($relativePath),
                 'slug' => $slug,
-                'raw_content' => $document->body(),
+                'raw_content' => $markdownWithIds,
+                'headings' => $headings,
                 'frontmatter' => $document->matter(),
                 'filepath' => $filepath,
                 'relative_path' => $relativePath,
@@ -147,5 +154,94 @@ class Lemme
     public function clearCache(): void
     {
         Cache::forget('lemme.pages');
+    }
+
+    /**
+     * Extract headings from markdown content and generate table of contents
+     */
+    protected function extractHeadings(string $markdownContent): array
+    {
+        $headings = [];
+        $lines = explode("\n", $markdownContent);
+
+        foreach ($lines as $line) {
+            // Match markdown headers (# ## ### etc.)
+            if (preg_match('/^(#{1,6})\s+(.+)$/', trim($line), $matches)) {
+                $level = strlen($matches[1]); // Number of # characters
+                $text = trim($matches[2]);
+
+                // Generate a URL-friendly ID from the heading text
+                $id = $this->generateHeadingId($text);
+
+                // Determine CSS class based on heading level
+                $class = $this->getHeadingClass($level);
+
+                $headings[] = [
+                    'id' => $id,
+                    'text' => $text,
+                    'level' => $level,
+                    'class' => $class,
+                ];
+            }
+        }
+
+        return $headings;
+    }
+
+    /**
+     * Generate a URL-friendly ID from heading text
+     */
+    protected function generateHeadingId(string $text): string
+    {
+        // Remove markdown formatting
+        $text = preg_replace('/[*_`]/', '', $text);
+
+        // Convert to lowercase and replace spaces/special chars with hyphens
+        $id = strtolower($text);
+        $id = preg_replace('/[^a-z0-9\s-]/', '', $id);
+        $id = preg_replace('/[\s-]+/', '-', $id);
+        $id = trim($id, '-');
+
+        return $id ?: 'heading';
+    }
+
+    /**
+     * Get CSS class for heading level
+     */
+    protected function getHeadingClass(int $level): string
+    {
+        return match ($level) {
+            1, 2 => 'font-medium',
+            3 => 'pl-2',
+            4 => 'pl-4',
+            5 => 'pl-6',
+            6 => 'pl-8',
+            default => '',
+        };
+    }
+
+    /**
+     * Inject heading IDs into markdown content
+     */
+    protected function injectHeadingIds(string $markdownContent, array $headings): string
+    {
+        $lines = explode("\n", $markdownContent);
+        $headingIndex = 0;
+
+        foreach ($lines as $index => $line) {
+            // Match markdown headers (# ## ### etc.)
+            if (preg_match('/^(#{1,6})\s+(.+)$/', trim($line), $matches)) {
+                if ($headingIndex < count($headings)) {
+                    $heading = $headings[$headingIndex];
+                    // Add the ID to the heading line by converting it to HTML with an id attribute
+                    $level = strlen($matches[1]);
+                    $text = trim($matches[2]);
+                    $lines[$index] = "<h{$level} id=\"{$heading['id']}\">{$text}</h{$level}>";
+                    $headingIndex++;
+                }
+            }
+        }
+
+        return implode("\n", $lines);
     }
 }

@@ -29,18 +29,12 @@ class LemmeCommand extends Command
         // Create sample documentation files
         $this->createSampleFiles($docsDirectory);
 
-        $forcePublishAssets = true;
-
-        if ($this->option('force') === false) {
-            $forcePublishAssets = false;
-        }
-
-        // Publish assets
+        // Always force asset publishing during install to ensure latest assets
         $this->call('vendor:publish', [
             '--tag' => 'lemme-assets',
-            '--force' => $forcePublishAssets,
+            '--force' => true,
         ]);
-        $this->info('Published Lemme assets');
+        $this->info('Published Lemme assets (forced to ensure latest version)');
 
         // Clear cache if enabled
         if (config('lemme.cache.enabled')) {
@@ -61,6 +55,9 @@ class LemmeCommand extends Command
         } else {
             $this->line('3. Your documentation will be available at: '.url('docs'));
         }
+
+        $this->newLine();
+        $this->line('<comment>Tip: After updating Lemme via Composer, run "php artisan lemme:publish --force" to update assets.</comment>');
 
         return self::SUCCESS;
     }

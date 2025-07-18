@@ -4,6 +4,7 @@ namespace Sorane\Lemme;
 
 use Sorane\Lemme\Commands\LemmeClearCommand;
 use Sorane\Lemme\Commands\LemmeCommand;
+use Sorane\Lemme\Commands\LemmePublishCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -19,7 +20,8 @@ class LemmeServiceProvider extends PackageServiceProvider
             ->hasAssets()
             ->hasCommands(
                 LemmeCommand::class,
-                LemmeClearCommand::class
+                LemmeClearCommand::class,
+                LemmePublishCommand::class
             );
     }
 
