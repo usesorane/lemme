@@ -44,7 +44,8 @@
                                 <!-- Background and content (rounded) -->
                                 <a class="w-full flex justify-between gap-2 py-1 pr-3 text-sm pl-4 rounded-lg text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white aria-[current]:text-zinc-950 dark:aria-[current]:text-white text-base/8 sm:text-sm/7 aria-[current]:font-semibold {{ $page['slug'] === $item['slug'] ? 'bg-zinc-800/2.5 dark:bg-white/2.5' : 'hover:bg-zinc-800/2.5 dark:hover:bg-white/2.5' }}" 
                                     type="button"
-                                    href="{{ $item['url'] }}">
+                                    href="{{ $item['url'] }}"
+                                    {{ $page['slug'] === $item['slug'] ? 'aria-current="page"' : '' }}>
                                     <span class="truncate">{{ $item['title'] }}</span>
                                 </a>
                             </li>
