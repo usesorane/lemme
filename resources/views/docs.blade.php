@@ -41,14 +41,24 @@
                 </div>
             </header>
             <div class="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
-                <main class="flex-auto">
-                    <article class="flex h-full flex-col pt-16 pb-10">
-                        <x-markdown class="flex-auto prose dark:prose-invert mx-auto max-w-2xl lg:max-w-3xl">
+                <main class="flex flex-auto">
+                    <article class="flex h-full flex-col pt-16 pb-10 flex-1">
+                        <x-markdown class="flex-auto max-w-prose mx-auto prose dark:prose-invert">
                             {!! $page['raw_content'] !!}
                         </x-markdown>
-                        <footer class="mx-auto mt-16 w-full max-w-2xl lg:max-w-5xl">
-                        </footer>
                     </article>
+                    
+                    <!-- On This Page Sidebar -->
+                    <aside class="hidden xl:block xl:w-64 xl:flex-shrink-0 xl:pl-8">
+                        <div class="sticky top-28 pt-16">
+                            <div class="space-y-3">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">On this page</h3>
+                                <nav id="table-of-contents" class="space-y-1">
+                                    <!-- TOC will be populated by JavaScript -->
+                                </nav>
+                            </div>
+                        </div>
+                    </aside>
                 </main>
                 <footer class="mx-auto w-full max-w-2xl space-y-10 pb-16 lg:max-w-5xl">
                     <div class="flex">
@@ -93,5 +103,57 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tocContainer = document.getElementById('table-of-contents');
+            const headings = document.querySelectorAll('.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6');
+            
+            if (headings.length === 0) {
+                // Hide the entire "On this page" section if no headings
+                const tocSection = tocContainer.closest('aside');
+                if (tocSection) tocSection.style.display = 'none';
+                return;
+            }
+            
+            headings.forEach((heading, index) => {
+                // Create an ID for the heading if it doesn't have one
+                if (!heading.id) {
+                    heading.id = 'heading-' + index;
+                }
+                
+                const link = document.createElement('a');
+                link.href = '#' + heading.id;
+                link.textContent = heading.textContent;
+                link.className = `block py-1 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-150 ${getHeadingClass(heading.tagName)}`;
+                
+                tocContainer.appendChild(link);
+            });
+            
+            // Smooth scrolling for anchor links
+            tocContainer.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    e.preventDefault();
+                    const targetId = e.target.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
+        
+        function getHeadingClass(tagName) {
+            switch(tagName.toLowerCase()) {
+                case 'h1': return 'font-medium';
+                case 'h2': return 'font-medium';
+                case 'h3': return 'pl-2';
+                case 'h4': return 'pl-4';
+                case 'h5': return 'pl-6';
+                case 'h6': return 'pl-8';
+                default: return '';
+            }
+        }
+    </script>
 </body>
 </html>
