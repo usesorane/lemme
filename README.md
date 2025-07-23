@@ -115,12 +115,47 @@ return [
 ---
 title: Getting Started
 description: Learn how to get started with our project
+slug: custom-getting-started
 ---
 
 # Getting Started
 
 Your content here...
 ```
+
+#### Slug Configuration
+
+Slugs determine the URL path for your documentation pages:
+
+- **Custom slugs**: Set a custom `slug` in the frontmatter to override the default
+- **Auto-generated slugs**: When no slug is provided, Lemme automatically generates one from the filename:
+  - Converts to `kebab-case` format
+  - Removes number prefixes (e.g., `1_`, `2-`, `10_`)
+  - Excludes directory names (only uses the filename)
+
+**Examples:**
+```
+docs/1_getting-started/2_installation.md
+├─ Default slug: "installation" 
+├─ URL: /installation
+
+docs/api/3-authentication.md  
+├─ Default slug: "authentication"
+├─ URL: /authentication
+
+docs/guides/advanced-features.md
+├─ Default slug: "advanced-features"  
+├─ URL: /advanced-features
+```
+
+**Custom slug example:**
+```markdown
+---
+title: Installation Guide
+slug: setup
+---
+```
+Result: `/setup` instead of `/installation`
 
 3. **Organize in folders** for better structure:
 
