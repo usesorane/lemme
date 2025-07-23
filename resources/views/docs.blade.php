@@ -38,17 +38,12 @@
                 <nav>
                     <ul class="space-y-1">
                         @foreach ($navigation as $item)
-                            <li class="relative flex items-center">
-                                <!-- Left border (not rounded) -->
-                                <div class="w-[1px] self-stretch mr-0.5 rounded {{ $page['slug'] === $item['slug'] ? 'bg-red-500' : 'bg-transparent' }}"></div>
-                                <!-- Background and content (rounded) -->
-                                <a class="w-full flex justify-between gap-2 py-1 pr-3 text-sm pl-4 rounded-lg text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white aria-[current]:text-zinc-950 dark:aria-[current]:text-white text-base/8 sm:text-sm/7 aria-[current]:font-semibold {{ $page['slug'] === $item['slug'] ? 'bg-zinc-800/2.5 dark:bg-white/2.5' : 'hover:bg-zinc-800/2.5 dark:hover:bg-white/2.5' }}" 
-                                    type="button"
-                                    href="{{ $item['url'] }}"
-                                    {{ $page['slug'] === $item['slug'] ? 'aria-current="page"' : '' }}>
-                                    <span class="truncate">{{ $item['title'] }}</span>
-                                </a>
-                            </li>
+                            @include('lemme::partials.nav-link', [
+                                'href' => $item['url'],
+                                'title' => $item['title'],
+                                'active' => $page['slug'] === $item['slug'],
+                                'showActiveIndicator' => true
+                            ])
                         @endforeach
                     </ul>
                 </nav>
@@ -65,16 +60,21 @@
         <!-- Table of Contents -->
         <div class="max-xl:hidden">
             <div class="sticky top-14 max-h-[calc(100svh-3.5rem)] overflow-x-hidden px-6 pt-10 pb-24">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">On this page</h3>
-                <nav class="space-y-1">
-                    @if (isset($page['headings']) && count($page['headings']) > 0)
-                        @foreach($page['headings'] as $heading)
-                            <a href="#{{ $heading['id'] }}" 
-                                class="block py-1 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-150 {{ $heading['class'] }}">
-                                {{ $heading['text'] }}
-                            </a>
-                        @endforeach
-                    @endif
+                <h3 class="text-xs font-semibold text-zinc-900 dark:text-white">On this page</h3>
+                <nav class="mt-3">
+                    <ul class="space-y-1">
+                        @if (isset($page['headings']) && count($page['headings']) > 0)
+                            @foreach($page['headings'] as $heading)
+                                @include('lemme::partials.nav-link', [
+                                    'href' => '#' . $heading['id'],
+                                    'title' => $heading['text'],
+                                    'active' => false,
+                                    'showActiveIndicator' => true,
+                                    'class' => $heading['class'] ?? ''
+                                ])
+                            @endforeach
+                        @endif
+                    </ul>
                 </nav>
             </div>
         </div>
