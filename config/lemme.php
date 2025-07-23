@@ -79,6 +79,13 @@ return [
         'auto_generate' => true,
         'sort_by' => 'filename', // 'filename', 'title', 'created_at', 'modified_at'
         'sort_direction' => 'asc',
+
+        // Directory-based grouping
+        'grouping' => [
+            'enabled' => true,
+            'sort_groups_by' => 'directory_name', // 'directory_name', 'title'
+            'sort_groups_direction' => 'asc',
+        ],
     ],
 
     /*

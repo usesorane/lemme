@@ -101,7 +101,10 @@ class Lemme
     {
         $filename = pathinfo($path, PATHINFO_FILENAME);
 
-        return ucwords(str_replace(['-', '_'], ' ', $filename));
+        // Remove number prefix from filename
+        $cleaned = $this->removeNumberPrefix($filename);
+
+        return ucwords(str_replace(['-', '_'], ' ', $cleaned));
     }
 
     /**
@@ -116,8 +119,33 @@ class Lemme
             'title' => fn ($page) => $direction === 'asc' ? $page['title'] : $page['title'] * -1,
             'created_at' => fn ($page) => $direction === 'asc' ? $page['created_at'] : $page['created_at'] * -1,
             'modified_at' => fn ($page) => $direction === 'asc' ? $page['modified_at'] : $page['modified_at'] * -1,
-            default => fn ($page) => $direction === 'asc' ? $page['relative_path'] : $page['relative_path'] * -1,
+            default => fn ($page) => $this->getSortableFilename($page['relative_path'], $direction),
         };
+    }
+
+    /**
+     * Get sortable filename considering number prefixes
+     */
+    protected function getSortableFilename(string $path, string $direction): string
+    {
+        $parts = explode('/', $path);
+        $sortableParts = [];
+
+        foreach ($parts as $part) {
+            // Extract number prefix for proper numeric sorting
+            if (preg_match('/^(\d+)[-_](.+)/', $part, $matches)) {
+                $number = str_pad($matches[1], 5, '0', STR_PAD_LEFT); // Pad for proper sorting
+                $name = $matches[2];
+                $sortableParts[] = $number.'_'.$name;
+            } else {
+                // No number prefix, add high number to sort after numbered items
+                $sortableParts[] = '99999_'.$part;
+            }
+        }
+
+        $sortableString = implode('/', $sortableParts);
+
+        return $direction === 'asc' ? $sortableString : str_replace('/', chr(255), $sortableString);
     }
 
     /**
@@ -125,13 +153,183 @@ class Lemme
      */
     public function getNavigation(): Collection
     {
-        return $this->getPages()->map(function ($page) {
+        $pages = $this->getPages();
+
+        // Check if grouping is enabled
+        if (config('lemme.navigation.grouping.enabled', true)) {
+            $groupedPages = $this->groupPagesByDirectory($pages);
+
+            return $this->buildNavigationTree($groupedPages);
+        }
+
+        // Fallback to flat navigation if grouping is disabled
+        return $pages->map(function ($page) {
             return [
+                'type' => 'page',
                 'title' => $page['title'],
                 'slug' => $page['slug'],
                 'url' => $this->getPageUrl($page['slug']),
             ];
         });
+    }
+
+    /**
+     * Group pages by their directory structure
+     */
+    protected function groupPagesByDirectory(Collection $pages): array
+    {
+        $grouped = [];
+
+        foreach ($pages as $page) {
+            $pathParts = explode('/', $page['relative_path']);
+            $filename = array_pop($pathParts); // Remove filename
+
+            // If no directory (root level), add to ungrouped
+            if (empty($pathParts)) {
+                $grouped['_root'][] = $page;
+            } else {
+                // Create nested array structure based on directory path
+                $current = &$grouped;
+                foreach ($pathParts as $dir) {
+                    if (! isset($current[$dir])) {
+                        $current[$dir] = [];
+                    }
+                    $current = &$current[$dir];
+                }
+
+                // Add page to the deepest directory level
+                if (! isset($current['_pages'])) {
+                    $current['_pages'] = [];
+                }
+                $current['_pages'][] = $page;
+            }
+        }
+
+        return $grouped;
+    }
+
+    /**
+     * Build navigation tree from grouped pages
+     */
+    protected function buildNavigationTree(array $grouped): Collection
+    {
+        $navigation = collect();
+
+        // Add root level pages first (ungrouped)
+        if (isset($grouped['_root'])) {
+            foreach ($grouped['_root'] as $page) {
+                $navigation->push([
+                    'type' => 'page',
+                    'title' => $page['title'],
+                    'slug' => $page['slug'],
+                    'url' => $this->getPageUrl($page['slug']),
+                ]);
+            }
+            unset($grouped['_root']);
+        }
+
+        // Sort groups if needed
+        $sortBy = config('lemme.navigation.grouping.sort_groups_by', 'directory_name');
+        $sortDirection = config('lemme.navigation.grouping.sort_groups_direction', 'asc');
+
+        $sortedGroups = collect($grouped);
+        if ($sortBy === 'directory_name') {
+            // Custom sorting that respects number prefixes
+            $sortedGroups = $sortedGroups->sortBy(function ($value, $key) {
+                return $this->getSortableDirectoryName($key);
+            }, SORT_REGULAR, $sortDirection === 'desc');
+        }
+
+        // Add grouped pages
+        foreach ($sortedGroups as $groupName => $groupData) {
+            $navigation->push($this->buildNavigationGroup($groupName, $groupData));
+        }
+
+        return $navigation;
+    }
+
+    /**
+     * Build a navigation group (with potential nesting)
+     */
+    protected function buildNavigationGroup(string $groupName, array $groupData): array
+    {
+        $group = [
+            'type' => 'group',
+            'title' => $this->formatGroupTitle($groupName),
+            'slug' => $groupName,
+            'children' => collect(),
+        ];
+
+        // Add pages in this group
+        if (isset($groupData['_pages'])) {
+            // Sort pages by their filename (respecting number prefixes)
+            $sortedPages = collect($groupData['_pages'])->sortBy(function ($page) {
+                $filename = basename($page['relative_path']);
+
+                return $this->getSortableDirectoryName($filename);
+            });
+
+            foreach ($sortedPages as $page) {
+                $group['children']->push([
+                    'type' => 'page',
+                    'title' => $page['title'],
+                    'slug' => $page['slug'],
+                    'url' => $this->getPageUrl($page['slug']),
+                ]);
+            }
+            unset($groupData['_pages']);
+        }
+
+        // Sort nested groups and add them
+        $sortedNestedGroups = collect($groupData)->sortBy(function ($value, $key) {
+            return $this->getSortableDirectoryName($key);
+        });
+
+        foreach ($sortedNestedGroups as $nestedGroupName => $nestedGroupData) {
+            $group['children']->push($this->buildNavigationGroup($nestedGroupName, $nestedGroupData));
+        }
+
+        return $group;
+    }
+
+    /**
+     * Format group title from directory name
+     */
+    protected function formatGroupTitle(string $dirName): string
+    {
+        // Remove number prefix (e.g., "1_", "01-", "2-")
+        $cleaned = $this->removeNumberPrefix($dirName);
+
+        // Convert kebab-case or snake_case to Title Case
+        $formatted = str_replace(['-', '_'], ' ', $cleaned);
+
+        return ucwords(strtolower($formatted));
+    }
+
+    /**
+     * Get sortable directory name considering number prefixes
+     */
+    protected function getSortableDirectoryName(string $dirName): string
+    {
+        // Extract number prefix for proper numeric sorting
+        if (preg_match('/^(\d+)[-_](.+)/', $dirName, $matches)) {
+            $number = str_pad($matches[1], 5, '0', STR_PAD_LEFT); // Pad for proper sorting
+            $name = $matches[2];
+
+            return $number.'_'.$name;
+        }
+
+        // No number prefix, add high number to sort after numbered items
+        return '99999_'.$dirName;
+    }
+
+    /**
+     * Remove number prefix from filename or directory name
+     */
+    protected function removeNumberPrefix(string $name): string
+    {
+        // Remove patterns like: "1_", "01-", "2-", "10_", etc.
+        return preg_replace('/^\d+[-_]/', '', $name);
     }
 
     /**

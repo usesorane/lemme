@@ -12,6 +12,7 @@ Lemme is a Laravel package that facilitates the creation of beautiful documentat
 - 🔧 **Configurable**: Customize themes, directories, and more
 - 🚀 **Laravel-native**: Seamlessly integrates with your Laravel application
 - ✨ **Syntax highlighting**: Automatic code highlighting powered by Shiki
+- 📁 **Directory-based grouping**: Organize navigation automatically using folder structure
 
 ## Installation
 
@@ -36,9 +37,28 @@ php artisan lemme:install
 
 This will:
 - Create a `docs` directory in your project root
-- Generate sample documentation files
+- Generate sample documentation files with **numbered structure**
 - Publish the compiled Tailwind CSS assets
 - Set up the necessary configuration
+
+**Example structure created:**
+```
+docs/
+├── index.md
+├── 1_getting-started/
+│   ├── 1_installation.md
+│   ├── 2_configuration.md
+│   └── 3_first-steps.md
+├── 2_api/
+│   ├── 1_authentication.md
+│   ├── 2_endpoints.md
+│   └── 3_advanced/
+│       ├── 1_webhooks.md
+│       └── 2_rate-limiting.md
+└── 3_guides/
+    ├── 1_deployment.md
+    └── 2_troubleshooting.md
+```
 
 ## Configuration
 
@@ -67,6 +87,13 @@ return [
         'auto_generate' => true,
         'sort_by' => 'filename', // 'filename', 'title', 'created_at', 'modified_at'
         'sort_direction' => 'asc',
+        
+        // Directory-based grouping
+        'grouping' => [
+            'enabled' => true,
+            'sort_groups_by' => 'directory_name',
+            'sort_groups_direction' => 'asc',
+        ],
     ],
 
     // Cache settings
@@ -100,14 +127,47 @@ Your content here...
 ```
 docs/
 ├── index.md
-├── getting-started.md
-├── guides/
+├── getting-started/
 │   ├── installation.md
 │   └── configuration.md
+├── guides/
+│   ├── deployment.md
+│   └── troubleshooting.md
 └── api/
     ├── authentication.md
     └── endpoints.md
 ```
+
+### Directory-based Navigation Grouping
+
+Lemme automatically organizes your navigation based on your directory structure. Each folder becomes a group in the sidebar navigation:
+
+- **Root files** (like `index.md`) appear ungrouped at the top
+- **Folder-based files** are grouped under collapsible sections
+- **Nested folders** create sub-groups for better organization
+
+**Example Structure:**
+```
+docs/
+├── index.md                    # Ungrouped: "Home"  
+├── 1_getting-started/          # Group: "Getting Started" (sorted first)
+│   ├── 1_installation.md       #   ├─ Installation
+│   └── 2_configuration.md      #   └─ Configuration
+└── 2_api/                      # Group: "API" (sorted second)
+    ├── 1_authentication.md     #   ├─ Authentication
+    ├── 2_endpoints.md          #   ├─ Endpoints  
+    └── 3_advanced/             #   └─ Advanced (sub-group)
+        ├── 1_webhooks.md       #       ├─ Webhooks
+        └── 2_rate-limiting.md  #       └─ Rate Limiting
+```
+
+**Number Prefixes for Sorting:**
+- Use `1_`, `2_`, `10_` or `1-`, `2-`, `10-` prefixes for precise ordering
+- Number prefixes are automatically removed from navigation titles
+- Both `snake_case` and `kebab-case` naming conventions are supported
+- Files and directories without numbers sort alphabetically after numbered ones
+
+You can disable grouping in the configuration if you prefer a flat navigation structure.
 
 ### Accessing Documentation
 

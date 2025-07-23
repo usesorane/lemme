@@ -3,7 +3,7 @@
 namespace Sorane\Lemme;
 
 use Sorane\Lemme\Commands\LemmeClearCommand;
-use Sorane\Lemme\Commands\LemmeCommand;
+use Sorane\Lemme\Commands\LemmeInstallCommand;
 use Sorane\Lemme\Commands\LemmePublishCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -19,7 +19,7 @@ class LemmeServiceProvider extends PackageServiceProvider
             ->hasRoute('web')
             ->hasAssets()
             ->hasCommands(
-                LemmeCommand::class,
+                LemmeInstallCommand::class,
                 LemmeClearCommand::class,
                 LemmePublishCommand::class
             );
