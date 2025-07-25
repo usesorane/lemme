@@ -8,22 +8,31 @@
     
     <!-- Tailwind CSS 4 (compiled) -->
     <link rel="stylesheet" href="{{ asset('vendor/lemme/app.css') }}">
-    
+
     <style>
         [x-cloak] { display: none !important; }
     </style>
 
     <script>!function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');if('system'===e||(!e&&true)){var t='(prefers-color-scheme: dark)',m=window.matchMedia(t);if(m.media!==t||m.matches){d.style.colorScheme = 'dark';c.add('dark')}else{d.style.colorScheme = 'light';c.add('light')}}else if(e){c.add(e|| '')}if(e==='light'||e==='dark')d.style.colorScheme=e}catch(e){}}()</script>
 </head>
-<body>
+<body x-data="{ searchModalOpen: false }" @keydown.cmd.k.prevent="searchModalOpen = true" @keydown.ctrl.k.prevent="searchModalOpen = true">
     <!-- Top Navigation -->
     <div class="fixed inset-x-0 top-0 z-10 border-b border-gray-950/5 dark:border-white/10">
-        <div class="flex h-14 items-center justify-between gap-8 px-4 sm:px-6">
+        <div class="bg-white dark:bg-zinc-900 flex h-14 items-center justify-between gap-8 px-4 sm:px-6">
             <div class="flex-shrink-0">
                 <a class="" aria-label="Home" href="/">
                     @include('lemme::partials.logo')
                 </a>
             </div>
+            <!-- Search Bar -->
+            <div class="hidden lg:block lg:max-w-md lg:flex-auto">
+                <button type="button" @click="searchModalOpen = true" class="hidden h-8 w-full items-center gap-2 rounded-lg bg-white pr-3 pl-2 text-sm text-zinc-500 ring-1 ring-zinc-900/10 hover:ring-zinc-900/20 lg:flex dark:bg-white/5 dark:text-zinc-400 dark:ring-white/10 dark:ring-inset dark:hover:ring-white/20">
+                    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="h-5 w-5 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12.01 12a4.25 4.25 0 1 0-6.02-6 4.25 4.25 0 0 0 6.02 6Zm0 0 3.24 3.25"></path>
+                    </svg>Find something...<kbd class="ml-auto text-2xs text-zinc-400 dark:text-zinc-500"><kbd class="font-sans">⌘</kbd><kbd class="font-sans">K</kbd></kbd>
+                </button>
+            </div>
+            <!-- Theme Switcher -->
             <div class="flex items-center gap-6 max-md:hidden">
                 <button type="button" 
                     onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');"
@@ -61,9 +70,9 @@
 
         <!-- Main Content -->
         <div class="mx-auto w-full max-w-2xl lg:max-w-3xl">
-            <x-markdown class="px-4 pt-10 pb-24 sm:px-6 xl:pr-0 prose dark:prose-invert">
-                {!! $page['raw_content'] !!}
-            </x-markdown>
+            <div class="px-4 pt-10 pb-24 sm:px-6 xl:pr-0 prose dark:prose-invert">
+                {!! $html !!}
+            </div>
         </div>
 
         <!-- Table of Contents -->
@@ -102,5 +111,10 @@
             }
         });
     </script>
+
+    <!-- modals -->
+    @include('lemme::partials.search-modal')
+
+    @livewireScripts
 </body>
 </html>

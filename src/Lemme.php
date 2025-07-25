@@ -50,6 +50,34 @@ class Lemme
     }
 
     /**
+     * Get rendered HTML for a specific page
+     */
+    public function getPageHtml(string $slug): ?string
+    {
+        $page = $this->getPage($slug);
+
+        if (! $page) {
+            return null;
+        }
+
+        $cacheKey = "lemme.html.{$slug}.".md5($page['modified_at']);
+
+        if (config('lemme.cache.enabled') && Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
+        $html = app(\Spatie\LaravelMarkdown\MarkdownRenderer::class)
+            ->highlightTheme(['light' => 'github-light', 'dark' => 'github-dark'])
+            ->toHtml($page['raw_content']);
+
+        if (config('lemme.cache.enabled')) {
+            Cache::put($cacheKey, $html, config('lemme.cache.ttl', 3600));
+        }
+
+        return $html;
+    }
+
+    /**
      * Parse a markdown file and extract frontmatter and content
      */
     protected function parseMarkdownFile(string $filepath): ?array
@@ -363,6 +391,13 @@ class Lemme
     public function clearCache(): void
     {
         Cache::forget('lemme.pages');
+
+        // Clear all HTML cache entries
+        $pages = $this->getPages();
+        foreach ($pages as $page) {
+            $cacheKey = "lemme.html.{$page['slug']}.".md5($page['modified_at']);
+            Cache::forget($cacheKey);
+        }
     }
 
     /**

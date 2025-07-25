@@ -21,6 +21,7 @@ class DocsController extends Controller
             if (! $page) {
                 $page = $pages->first();
             }
+            $slug = $page['slug'];
         } else {
             $page = Lemme::getPage($slug);
         }
@@ -30,9 +31,11 @@ class DocsController extends Controller
         }
 
         $navigation = Lemme::getNavigation();
+        $html = Lemme::getPageHtml($slug);
 
         return view('lemme::docs', [
             'page' => $page,
+            'html' => $html,
             'pages' => $pages,
             'navigation' => $navigation,
             'siteTitle' => config('lemme.site_title', 'Documentation'),

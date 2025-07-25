@@ -11,5 +11,8 @@
         "@tailwindcss/vite": "^4.1.11",
         "tailwindcss": "^4.1.11",
         "vite": "^6.0.0"
+    },
+    "dependencies": {
+        "shiki": "^3.8.1"
     }
 }
