@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $page['title'] }} - {{ $siteTitle }}</title>
     <meta name="description" content="{{ $siteDescription }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- Tailwind CSS 4 (compiled) -->
     <link rel="stylesheet" href="{{ asset('vendor/lemme/app.css') }}">

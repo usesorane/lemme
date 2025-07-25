@@ -2,6 +2,7 @@
 
 namespace Sorane\Lemme;
 
+use Livewire\Livewire;
 use Sorane\Lemme\Commands\LemmeClearCommand;
 use Sorane\Lemme\Commands\LemmeInstallCommand;
 use Sorane\Lemme\Commands\LemmePublishCommand;
@@ -31,5 +32,8 @@ class LemmeServiceProvider extends PackageServiceProvider
         $this->app->singleton('lemme', function () {
             return new Lemme;
         });
+
+        // Load the Livewire component
+        Livewire::component('lemme.search-component', \Sorane\Lemme\Livewire\SearchComponent::class);
     }
 }
