@@ -41,7 +41,23 @@ class LemmeInstallCommand extends Command
             $this->info('Cleared documentation cache');
         }
 
-        $lemmeDomain = config('lemme.subdomain') ? config('lemme.subdomain').'.'.parse_url(config('app.url'), PHP_URL_HOST) : url('docs/index');
+        // Determine the correct URL based on configuration
+        $subdomain = config('lemme.subdomain');
+        $routePrefix = config('lemme.route_prefix');
+
+        if ($subdomain && ! $routePrefix) {
+            // Using subdomain routing
+            $appUrl = config('app.url');
+            $protocol = parse_url($appUrl, PHP_URL_SCHEME);
+            $host = parse_url($appUrl, PHP_URL_HOST);
+            $lemmeDomain = $protocol.'://'.$subdomain.'.'.$host;
+        } elseif ($routePrefix) {
+            // Using route prefix (default)
+            $lemmeDomain = url($routePrefix);
+        } else {
+            // Fallback to default docs prefix
+            $lemmeDomain = url('docs');
+        }
 
         $this->newLine();
         $this->info('✅ Lemme documentation system installed successfully!');
@@ -52,7 +68,7 @@ class LemmeInstallCommand extends Command
         $this->line('Next steps:');
         $this->line('1. Access the sample documentation at: '.$lemmeDomain.' to see how it works');
         $this->line('2. Add your markdown file based documentation to the docs/ directory in your Laravel project');
-        $this->line('3. Configure your subdomain or route prefix in config/lemme.php');
+        $this->line('3. Optionally configure subdomain routing in config/lemme.php if you prefer docs.yoursite.com');
 
         $this->newLine();
         $this->line('<comment>Tip: After updating Lemme via Composer, run "php artisan lemme:publish --force" to update assets.</comment>');

@@ -19,22 +19,22 @@ return [
     |--------------------------------------------------------------------------
     |
     | The subdomain where your documentation will be served.
-    | By default, it's 'docs' (e.g., docs.yoursite.com).
+    | Leave as null to use route prefix instead (e.g., yoursite.com/docs).
     |
     */
-    'subdomain' => env('LEMME_SUBDOMAIN', 'docs'),
+    'subdomain' => env('LEMME_SUBDOMAIN', null),
 
     /*
     |--------------------------------------------------------------------------
     | Route Prefix
     |--------------------------------------------------------------------------
     |
-    | If you don't want to use a subdomain, you can use a route prefix instead.
-    | Leave as null to use subdomain, or set to a string like 'docs' to use
-    | yoursite.com/docs instead.
+    | The route prefix where your documentation will be served.
+    | By default, it's 'docs' (e.g., yoursite.com/docs).
+    | Set to null to use subdomain routing instead.
     |
     */
-    'route_prefix' => env('LEMME_ROUTE_PREFIX', null),
+    'route_prefix' => env('LEMME_ROUTE_PREFIX', 'docs'),
 
     /*
     |--------------------------------------------------------------------------

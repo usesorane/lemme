@@ -69,11 +69,11 @@ return [
     // Directory where your markdown files are stored
     'docs_directory' => env('LEMME_DOCS_DIRECTORY', 'docs'),
 
-    // Subdomain for documentation (e.g., docs.yoursite.com)
-    'subdomain' => env('LEMME_SUBDOMAIN', 'docs'),
+    // Route prefix for documentation (e.g., yoursite.com/docs)
+    'route_prefix' => env('LEMME_ROUTE_PREFIX', 'docs'),
 
-    // Alternative: use route prefix instead of subdomain
-    'route_prefix' => env('LEMME_ROUTE_PREFIX', null),
+    // Alternative: use subdomain instead of route prefix
+    'subdomain' => env('LEMME_SUBDOMAIN', null),
 
     // Theme configuration
     'theme' => env('LEMME_THEME', 'default'),
@@ -208,8 +208,8 @@ You can disable grouping in the configuration if you prefer a flat navigation st
 
 By default, your documentation will be available at:
 
+- **Route prefix**: `https://yoursite.com/docs` (default)
 - **Subdomain**: `https://docs.yoursite.com` (if using subdomain routing)
-- **Route prefix**: `https://yoursite.com/docs` (if using route prefix)
 
 ### API Access
 
@@ -284,13 +284,13 @@ Lemme includes built-in caching to ensure your documentation loads quickly:
 - Easy cache clearing via command or facade
 - Configurable cache TTL
 
-## Subdomain Setup
+## Subdomain Setup (Optional)
 
-To use subdomain routing (e.g., `docs.yoursite.com`):
+By default, Lemme serves documentation at `/docs` on your main domain. To use subdomain routing instead (e.g., `docs.yoursite.com`):
 
 1. **Configure DNS**: Add a CNAME record pointing `docs` to your main domain
 2. **Set up web server**: Configure your web server to handle the subdomain
-3. **Update config**: Set `LEMME_SUBDOMAIN=docs` in your `.env` file
+3. **Update config**: Set `LEMME_SUBDOMAIN=docs` and `LEMME_ROUTE_PREFIX=null` in your `.env` file
 
 For Apache, add to your virtual host:
 ```apache
