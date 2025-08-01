@@ -8,21 +8,14 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 css: 'src/input.css',
-                js: 'src/search.js'
+                js: 'src/input.js'
             },
             output: {
-                assetFileNames: (assetInfo) => {
-                    if (assetInfo.name && assetInfo.name.includes('input')) {
-                        return 'app.css';
-                    }
-                    return '[name].[ext]';
-                },
                 entryFileNames: (chunkInfo) => {
-                    if (chunkInfo.name === 'js') {
-                        return 'search.js';
-                    }
+                    if (chunkInfo.name === 'js') return 'search.js';
                     return '[name].js';
-                }
+                },
+                assetFileNames: 'app.[ext]'
             }
         }
     }
