@@ -1,4 +1,17 @@
-<div x-init="$watch('searchModalOpen', value => { if (value) { setTimeout(() => $refs.searchInput.focus(), 100) } })">
+<div x-init="$watch('searchModalOpen', value => { if (value) { setTimeout(() => $refs.searchInput.focus(), 100) } })"
+     x-data="{ highlightedResults: [] }"
+     @search-data-ready.window="
+         if (window.lemmeSearchInstance) {
+             window.lemmeSearchInstance.init($event.detail.data);
+         }
+     "
+     @perform-search.window="
+         if (window.lemmeSearchInstance) {
+             const results = window.lemmeSearchInstance.search($event.detail.query, 5);
+             highlightedResults = results;
+             $wire.call('handleSearchResults', results);
+         }
+     ">
     <div class="group relative flex h-12">
         <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="pointer-events-none absolute top-0 left-3 h-full w-5 stroke-zinc-500">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12.01 12a4.25 4.25 0 1 0-6.02-6 4.25 4.25 0 0 0 6.02 6Zm0 0 3.24 3.25"></path>
@@ -25,21 +38,54 @@
                     <li class="group block cursor-pointer px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 {{ $index > 0 ? 'border-t border-zinc-100 dark:border-zinc-800' : '' }}" 
                         wire:click="$dispatch('navigate-to', { url: '{{ $result['url'] }}' })">
                         <div class="text-sm font-medium text-zinc-900 group-hover:text-emerald-500 dark:text-white">
-                            @if(strlen($search) > 0)
-                                {!! $this->highlightSearchTerm($result['title'], $search) !!}
-                            @else
-                                {{ $result['title'] }}
+                            <span x-html="
+                                (() => {
+                                    const result = highlightedResults[{{ $index }}];
+                                    if (result && result.matches && window.lemmeSearchInstance) {
+                                        return window.lemmeSearchInstance.highlightMatches(
+                                            '{{ addslashes($result['title']) }}', 
+                                            result.matches, 
+                                            'title'
+                                        );
+                                    }
+                                    return '{{ addslashes($result['title']) }}';
+                                })()
+                            "></span>
+                        </div>
+                        <div class="mt-1 flex items-center gap-2 text-2xs whitespace-nowrap text-zinc-500">
+                            <span>{{ $result['category'] }}</span>
+                            @if(isset($result['score']))
+                                <span class="opacity-60">
+                                    • {{ number_format((1 - $result['score']) * 100, 0) }}% match
+                                </span>
                             @endif
                         </div>
-                        <div class="mt-1 truncate text-2xs whitespace-nowrap text-zinc-500">
-                            <span>{{ $result['category'] }}</span>
-                        </div>
+                        @if(strlen($search) > 0 && !empty($result['content']))
+                            <div class="mt-1 text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                                <span x-html="
+                                    (() => {
+                                        const result = highlightedResults[{{ $index }}];
+                                        if (result && result.matches && window.lemmeSearchInstance) {
+                                            return window.lemmeSearchInstance.highlightMatches(
+                                                '{{ addslashes(Str::limit($result['content'], 120)) }}', 
+                                                result.matches, 
+                                                'content'
+                                            );
+                                        }
+                                        return '{{ addslashes(Str::limit($result['content'], 120)) }}';
+                                    })()
+                                "></span>
+                            </div>
+                        @endif
                     </li>
                 @endforeach
             </ul>
         @elseif (strlen(trim($search)) > 0)
             <div class="px-4 py-8 text-center text-sm text-zinc-500">
-                No results found for "{{ $search }}"
+                <div class="mb-2">No results found for "{{ $search }}"</div>
+                <div class="text-xs text-zinc-400">
+                    Try different keywords or check spelling
+                </div>
             </div>
         @endif
     </div>

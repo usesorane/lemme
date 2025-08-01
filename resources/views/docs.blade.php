@@ -10,8 +10,17 @@
     <!-- Tailwind CSS 4 (compiled) -->
     <link rel="stylesheet" href="{{ asset('vendor/lemme/app.css') }}">
 
+    <!-- Fuse.js Search -->
+    <script src="{{ asset('vendor/lemme/search.js') }}" defer></script>
+
     <style>
         [x-cloak] { display: none !important; }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
 
     <script>!function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');if('system'===e||(!e&&true)){var t='(prefers-color-scheme: dark)',m=window.matchMedia(t);if(m.media!==t||m.matches){d.style.colorScheme = 'dark';c.add('dark')}else{d.style.colorScheme = 'light';c.add('light')}}else if(e){c.add(e|| '')}if(e==='light'||e==='dark')d.style.colorScheme=e}catch(e){}}()</script>

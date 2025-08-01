@@ -12,6 +12,7 @@ class LemmeTest extends TestCase
     protected function getPackageProviders($app)
     {
         return [
+            \Livewire\LivewireServiceProvider::class,
             LemmeServiceProvider::class,
         ];
     }
