@@ -58,14 +58,14 @@ class LemmeSearch {
 
         const results = this.fuse.search(query, { limit });
 
-        return results.map(result => ({
+        const processedResults = results.map(result => ({
             ...result.item,
             score: result.score,
             matches: result.matches
         }));
-    }
 
-    /**
+        return processedResults;
+    }    /**
      * Add new item to search index
      * @param {Object} item - Item to add
      */
@@ -140,12 +140,12 @@ window.LemmeSearch = LemmeSearch;
 document.addEventListener('DOMContentLoaded', function () {
     // Create global search instance
     window.lemmeSearchInstance = new LemmeSearch();
+});
 
-    // Listen for Livewire events to initialize search data
-    document.addEventListener('livewire:initialized', function () {
-        // Dispatch event to get initial search data
-        Livewire.dispatch('init-search-data');
-    });
+// Listen for Livewire events to initialize search data
+document.addEventListener('livewire:initialized', function () {
+    // Dispatch event to get initial search data
+    Livewire.dispatch('init-search-data');
 });
 
 export default LemmeSearch;

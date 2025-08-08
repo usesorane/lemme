@@ -39,48 +39,49 @@
         @if (count($results) > 0)
             <ul role="listbox" class="max-h-80 overflow-y-auto">
                 @foreach($results as $index => $result)
-                    <li class="group block cursor-pointer px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 {{ $index > 0 ? 'border-t border-zinc-100 dark:border-zinc-800' : '' }}" 
-                        wire:click="$dispatch('navigate-to', { url: '{{ $result['url'] }}' })">
-                        <div class="text-sm font-medium text-zinc-900 group-hover:text-emerald-500 dark:text-white">
-                            <span x-html="
-                                (() => {
-                                    const result = highlightedResults[{{ $index }}];
-                                    if (result && result.matches && window.lemmeSearchInstance) {
-                                        return window.lemmeSearchInstance.highlightMatches(
-                                            '{{ addslashes($result['title']) }}', 
-                                            result.matches, 
-                                            'title'
-                                        );
-                                    }
-                                    return '{{ addslashes($result['title']) }}';
-                                })()
-                            "></span>
-                        </div>
-                        <div class="mt-1 flex items-center gap-2 text-2xs whitespace-nowrap text-zinc-500">
-                            <span>{{ $result['category'] }}</span>
-                            @if(isset($result['score']))
-                                <span class="opacity-60">
-                                    • {{ number_format((1 - $result['score']) * 100, 0) }}% match
-                                </span>
-                            @endif
-                        </div>
-                        @if(strlen($search) > 0 && !empty($result['content']))
-                            <div class="mt-1 text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                    <li class="group {{ $index > 0 ? 'border-t border-zinc-100 dark:border-zinc-800' : '' }}">
+                        <a href="{{ $result['url'] }}" class="block cursor-pointer px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                            <div class="text-sm font-medium text-zinc-900 group-hover:text-emerald-500 dark:text-white">
                                 <span x-html="
                                     (() => {
                                         const result = highlightedResults[{{ $index }}];
                                         if (result && result.matches && window.lemmeSearchInstance) {
                                             return window.lemmeSearchInstance.highlightMatches(
-                                                '{{ addslashes(Str::limit($result['content'], 120)) }}', 
+                                                '{{ addslashes($result['title']) }}', 
                                                 result.matches, 
-                                                'content'
+                                                'title'
                                             );
                                         }
-                                        return '{{ addslashes(Str::limit($result['content'], 120)) }}';
+                                        return '{{ addslashes($result['title']) }}';
                                     })()
                                 "></span>
                             </div>
-                        @endif
+                            <div class="mt-1 flex items-center gap-2 text-2xs whitespace-nowrap text-zinc-500">
+                                <span>{{ $result['category'] }}</span>
+                                @if(isset($result['score']))
+                                    <span class="opacity-60">
+                                        • {{ number_format((1 - $result['score']) * 100, 0) }}% match
+                                    </span>
+                                @endif
+                            </div>
+                            @if(strlen($search) > 0 && !empty($result['content']))
+                                <div class="mt-1 text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                                    <span x-html="
+                                        (() => {
+                                            const result = highlightedResults[{{ $index }}];
+                                            if (result && result.matches && window.lemmeSearchInstance) {
+                                                return window.lemmeSearchInstance.highlightMatches(
+                                                    '{{ addslashes(Str::limit($result['content'], 120)) }}', 
+                                                    result.matches, 
+                                                    'content'
+                                                );
+                                            }
+                                            return '{{ addslashes(Str::limit($result['content'], 120)) }}';
+                                        })()
+                                    "></span>
+                                </div>
+                            @endif
+                        </a>
                     </li>
                 @endforeach
             </ul>

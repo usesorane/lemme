@@ -95,21 +95,6 @@ class SearchComponent extends Component
         $this->results = $results;
     }
 
-    public function highlightSearchTerm($text, $searchTerm)
-    {
-        if (empty($searchTerm)) {
-            return $text;
-        }
-
-        $highlighted = preg_replace(
-            '/('.preg_quote($searchTerm, '/').')/i',
-            '<mark class="underline bg-transparent text-emerald-500">$1</mark>',
-            $text
-        );
-
-        return $highlighted;
-    }
-
     public function render()
     {
         return view('lemme::livewire.search-component');
