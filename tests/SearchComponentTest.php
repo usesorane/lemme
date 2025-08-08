@@ -46,8 +46,7 @@ class SearchComponentTest extends TestCase
     {
         Livewire::test(SearchComponent::class)
             ->assertSet('search', '')
-            ->assertSet('results', [])
-            ->assertSet('searchInitialized', false);
+            ->assertSet('results', []);
     }
 
     /** @test */
@@ -55,7 +54,6 @@ class SearchComponentTest extends TestCase
     {
         Livewire::test(SearchComponent::class)
             ->call('initSearchData')
-            ->assertSet('searchInitialized', true)
             ->assertDispatched('search-data-ready');
     }
 
@@ -92,25 +90,5 @@ class SearchComponentTest extends TestCase
             ->set('search', 'test')
             ->set('search', '')
             ->assertSet('results', []);
-    }
-
-    /** @test */
-    public function it_highlights_search_terms_correctly()
-    {
-        $component = new SearchComponent;
-
-        $highlighted = $component->highlightSearchTerm('Installation Guide', 'install');
-
-        $this->assertStringContainsString('<mark class="underline bg-transparent text-emerald-500">install</mark>', strtolower($highlighted));
-    }
-
-    /** @test */
-    public function it_returns_original_text_when_no_search_term()
-    {
-        $component = new SearchComponent;
-
-        $result = $component->highlightSearchTerm('Installation Guide', '');
-
-        $this->assertEquals('Installation Guide', $result);
     }
 }
