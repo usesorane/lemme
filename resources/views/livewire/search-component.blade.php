@@ -3,6 +3,8 @@
      @search-data-ready.window="
          if (window.lemmeSearchInstance) {
              window.lemmeSearchInstance.init($event.detail.data);
+         } else {
+             console.error('lemmeSearchInstance not available');
          }
      "
      @perform-search.window="
@@ -10,6 +12,8 @@
              const results = window.lemmeSearchInstance.search($event.detail.query, 5);
              highlightedResults = results;
              $wire.call('handleSearchResults', results);
+         } else {
+             console.error('lemmeSearchInstance not available for search');
          }
      ">
     <div class="group relative flex h-12">

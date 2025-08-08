@@ -2,7 +2,6 @@
 
 namespace Sorane\Lemme\Livewire;
 
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 class SearchComponent extends Component
@@ -11,7 +10,15 @@ class SearchComponent extends Component
 
     public $results = [];
 
-    public $searchInitialized = false;
+    protected $listeners = [
+        'init-search-data' => 'initSearchData',
+        'search-results' => 'handleSearchResults',
+    ];
+
+    public function mount()
+    {
+        $this->initSearchData();
+    }
 
     // Dummy data for testing - in a real implementation,
     // this would come from your docs/markdown files
@@ -66,10 +73,8 @@ class SearchComponent extends Component
         ],
     ];
 
-    #[On('init-search-data')]
     public function initSearchData()
     {
-        $this->searchInitialized = true;
         $this->dispatch('search-data-ready', data: $this->dummyData);
     }
 
@@ -85,7 +90,6 @@ class SearchComponent extends Component
         $this->dispatch('perform-search', query: trim($this->search));
     }
 
-    #[On('search-results')]
     public function handleSearchResults($results)
     {
         $this->results = $results;
