@@ -1,6 +1,5 @@
 <?php
 
-// config for Sorane/Lemme
 return [
     /*
     |--------------------------------------------------------------------------
@@ -99,5 +98,17 @@ return [
     'cache' => [
         'enabled' => env('LEMME_CACHE_ENABLED', true),
         'ttl' => env('LEMME_CACHE_TTL', 3600), // 1 hour
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Search
+    |--------------------------------------------------------------------------
+    |
+    | Configure search functionality settings.
+    |
+    */
+    'search' => [
+        'max_content_length' => env('LEMME_SEARCH_MAX_CONTENT_LENGTH', 0), // 0 = no limit (index full content)
     ],
 ];

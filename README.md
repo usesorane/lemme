@@ -66,40 +66,115 @@ Use the environment variables or edit `config/lemme.php` to customize your docum
 
 ```php
 return [
-    // Directory where your markdown files are stored
+    /*
+    |--------------------------------------------------------------------------
+    | Documentation Directory
+    |--------------------------------------------------------------------------
+    |
+    | This is the directory where your markdown documentation files are stored.
+    | By default, it's 'docs' but you can change it to any directory you prefer.
+    |
+    */
     'docs_directory' => env('LEMME_DOCS_DIRECTORY', 'docs'),
 
-    // Route prefix for documentation (e.g., yoursite.com/docs)
-    'route_prefix' => env('LEMME_ROUTE_PREFIX', 'docs'),
-
-    // Alternative: use subdomain instead of route prefix
+    /*
+    |--------------------------------------------------------------------------
+    | Subdomain
+    |--------------------------------------------------------------------------
+    |
+    | The subdomain where your documentation will be served.
+    | Leave as null to use route prefix instead (e.g., yoursite.com/docs).
+    |
+    */
     'subdomain' => env('LEMME_SUBDOMAIN', null),
 
-    // Theme configuration
+    /*
+    |--------------------------------------------------------------------------
+    | Route Prefix
+    |--------------------------------------------------------------------------
+    |
+    | The route prefix where your documentation will be served.
+    | By default, it's 'docs' (e.g., yoursite.com/docs).
+    | Set to null to use subdomain routing instead.
+    |
+    */
+    'route_prefix' => env('LEMME_ROUTE_PREFIX', 'docs'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Theme
+    |--------------------------------------------------------------------------
+    |
+    | The theme to use for your documentation site.
+    | Available themes: 'default', 'dark', 'minimal'
+    |
+    */
     'theme' => env('LEMME_THEME', 'default'),
 
-    // Site information
+    /*
+    |--------------------------------------------------------------------------
+    | Site Title
+    |--------------------------------------------------------------------------
+    |
+    | The title of your documentation site.
+    |
+    */
     'site_title' => env('LEMME_SITE_TITLE', 'Documentation'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Site Description
+    |--------------------------------------------------------------------------
+    |
+    | A brief description of your documentation site.
+    |
+    */
     'site_description' => env('LEMME_SITE_DESCRIPTION', 'Project Documentation'),
 
-    // Navigation settings
+    /*
+    |--------------------------------------------------------------------------
+    | Navigation
+    |--------------------------------------------------------------------------
+    |
+    | Configure how navigation is generated from your markdown files.
+    |
+    */
     'navigation' => [
         'auto_generate' => true,
         'sort_by' => 'filename', // 'filename', 'title', 'created_at', 'modified_at'
         'sort_direction' => 'asc',
-        
+
         // Directory-based grouping
         'grouping' => [
             'enabled' => true,
-            'sort_groups_by' => 'directory_name',
+            'sort_groups_by' => 'directory_name', // 'directory_name', 'title'
             'sort_groups_direction' => 'asc',
         ],
     ],
 
-    // Cache settings
+    /*
+    |--------------------------------------------------------------------------
+    | Cache
+    |--------------------------------------------------------------------------
+    |
+    | Enable caching for better performance in production.
+    |
+    */
     'cache' => [
         'enabled' => env('LEMME_CACHE_ENABLED', true),
-        'ttl' => env('LEMME_CACHE_TTL', 3600),
+        'ttl' => env('LEMME_CACHE_TTL', 3600), // 1 hour
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Search
+    |--------------------------------------------------------------------------
+    |
+    | Configure search functionality settings.
+    |
+    */
+    'search' => [
+        'max_content_length' => env('LEMME_SEARCH_MAX_CONTENT_LENGTH', 0), // 0 = no limit (index full content)
     ],
 ];
 ```

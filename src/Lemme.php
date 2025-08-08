@@ -36,6 +36,9 @@ class Lemme
 
         if (config('lemme.cache.enabled')) {
             Cache::put($cacheKey, $pages, config('lemme.cache.ttl', 3600));
+
+            // Build and cache search data at the same time
+            $this->buildAndCacheSearchData($pages);
         }
 
         return $pages;
@@ -398,6 +401,9 @@ class Lemme
             $cacheKey = "lemme.html.{$page['slug']}.".md5($page['modified_at']);
             Cache::forget($cacheKey);
         }
+
+        // Clear search cache
+        Cache::forget('lemme.search_data');
     }
 
     /**
@@ -487,5 +493,98 @@ class Lemme
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * Build and cache search data from pages
+     */
+    protected function buildAndCacheSearchData(Collection $pages): void
+    {
+        $searchData = $this->buildSearchDataFromPages($pages);
+        Cache::put('lemme.search_data', $searchData, config('lemme.cache.ttl', 3600));
+    }
+
+    /**
+     * Get search data (cached or generate from pages)
+     */
+    public function getSearchData(): array
+    {
+        if (config('lemme.cache.enabled') && Cache::has('lemme.search_data')) {
+            return Cache::get('lemme.search_data');
+        }
+
+        // If search data is not cached but pages are, build from cached pages
+        $pages = $this->getPages();
+
+        return $this->buildSearchDataFromPages($pages);
+    }
+
+    /**
+     * Build search data array from pages collection
+     */
+    protected function buildSearchDataFromPages(Collection $pages): array
+    {
+        return $pages->map(function ($page) {
+            return [
+                'title' => $page['title'],
+                'category' => $this->getCategoryFromPath($page['relative_path']),
+                'url' => $this->getPageUrl($page['slug']),
+                'content' => $this->getSearchableContent($page['raw_content']),
+                'slug' => $page['slug'],
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Extract category from file path (directory name)
+     */
+    protected function getCategoryFromPath(string $path): string
+    {
+        $pathParts = explode('/', $path);
+
+        if (count($pathParts) > 1) {
+            // Get the first directory name
+            $directory = $pathParts[0];
+
+            // Remove number prefix and format as title
+            $cleaned = $this->removeNumberPrefix($directory);
+            $formatted = str_replace(['-', '_'], ' ', $cleaned);
+
+            return ucwords(strtolower($formatted));
+        }
+
+        return 'General';
+    }
+
+    /**
+     * Get searchable content from markdown, optimized for search
+     */
+    protected function getSearchableContent(string $content): string
+    {
+        // Make content length configurable - default to no limit for comprehensive search
+        $maxLength = config('lemme.search.max_content_length', 0);
+
+        // Remove HTML tags that were injected for headings
+        $content = preg_replace('/<h[1-6][^>]*>(.*?)<\/h[1-6]>/', '$1', $content);
+
+        // Remove markdown formatting
+        $patterns = [
+            '/^#{1,6}\s+/m',           // Headers
+            '/\*\*(.*?)\*\*/',         // Bold
+            '/\*(.*?)\*/',             // Italic
+            '/`(.*?)`/',               // Inline code
+            '/```[\s\S]*?```/',        // Code blocks
+            '/\[(.*?)\]\([^)]*\)/',    // Links
+            '/!\[.*?\]\([^)]*\)/',     // Images
+        ];
+
+        $content = preg_replace($patterns, ['$1', '$1', '$1', '$1', '', '$1', ''], $content);
+
+        // Clean up whitespace and truncate
+        $content = preg_replace('/\s+/', ' ', trim($content));
+
+        return $maxLength > 0 && strlen($content) > $maxLength
+            ? substr($content, 0, $maxLength).'...'
+            : $content;
     }
 }
