@@ -176,8 +176,86 @@ return [
     'search' => [
         'max_content_length' => env('LEMME_SEARCH_MAX_CONTENT_LENGTH', 0), // 0 = no limit (index full content)
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Logo
+    |--------------------------------------------------------------------------
+    |
+    | Configure how the logo in the documentation layout is rendered.
+    | Supported types:
+    | - view  : renders a Blade view (default existing partial)
+    | - image : renders an <img> tag (provide image path relative to public/ or full URL)
+    | - text  : renders plain text inside a <span>
+    |
+    | You can override via env vars, e.g.:
+    |   LEMME_LOGO_TYPE=image
+    |   LEMME_LOGO_IMAGE="images/logo.svg"
+    |   LEMME_LOGO_ALT="My Project"
+    |
+    */
+    'logo' => [
+        'type' => env('LEMME_LOGO_TYPE', 'view'),
+        'view' => env('LEMME_LOGO_VIEW', 'lemme::partials.logo'),
+        'image' => env('LEMME_LOGO_IMAGE', null),
+        'text' => env('LEMME_LOGO_TEXT', null),
+        'alt' => env('LEMME_LOGO_ALT', 'Logo'),
+        // Additional CSS classes applied to the root element of image/text variants
+        'classes' => env('LEMME_LOGO_CLASSES', 'h-6 text-black dark:text-white'),
+    ],
 ];
 ```
+
+### Logo Customization
+
+You can fully customize the logo displayed in the header. Choose one of three rendering modes via the config file or environment variables.
+
+> Recommended: Use the `view` (Blade partial) option. It's the most flexible and future‑proof approach because you can:
+> - Swap light/dark variants conditionally
+> - Add accessible markup (ARIA labels, screen-reader text)
+> - Inject dynamic data (app version, beta badge, etc.)
+> - Reuse shared components / Tailwind classes
+> - Evolve the logo without changing `.env` variables
+>
+> The `image` and `text` modes are intentionally lightweight shortcuts, but most projects should create and use a Blade partial.
+
+| Type  | Env Setting                   | Required Extra Vars                 | Description                            |
+|-------|-------------------------------|--------------------------------------|----------------------------------------|
+| view  | `LEMME_LOGO_TYPE=view`        | `LEMME_LOGO_VIEW` (optional)         | Renders a Blade view (default partial) |
+| image | `LEMME_LOGO_TYPE=image`       | `LEMME_LOGO_IMAGE` (path or URL)     | Outputs an `<img>` tag                 |
+| text  | `LEMME_LOGO_TYPE=text`        | `LEMME_LOGO_TEXT` (string)           | Simple text logo                       |
+
+Common optional variables:
+
+```
+LEMME_LOGO_ALT="My Project"            # Alt text for image variant
+LEMME_LOGO_CLASSES="h-6 w-auto"        # Extra classes applied to root element
+```
+
+Examples:
+
+Image logo:
+```
+LEMME_LOGO_TYPE=image
+LEMME_LOGO_IMAGE=images/logo.svg
+LEMME_LOGO_ALT="Acme Docs"
+LEMME_LOGO_CLASSES="h-8 w-auto"
+```
+
+Text logo:
+```
+LEMME_LOGO_TYPE=text
+LEMME_LOGO_TEXT="Acme Docs"
+LEMME_LOGO_CLASSES="text-lg font-bold"
+```
+
+Custom view (via your own Blade partial):
+```
+LEMME_LOGO_TYPE=view
+LEMME_LOGO_VIEW=branding.logo
+```
+
+If a required variable for the chosen type is missing (or the view can't be resolved), Lemme gracefully falls back to the default bundled SVG logo.
 
 ## Usage
 

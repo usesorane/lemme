@@ -569,16 +569,51 @@ class Lemme
 
         // Remove markdown formatting
         $patterns = [
-            '/^#{1,6}\s+/m',           // Headers
-            '/\*\*(.*?)\*\*/',         // Bold
-            '/\*(.*?)\*/',             // Italic
-            '/`(.*?)`/',               // Inline code
-            '/```[\s\S]*?```/',        // Code blocks
-            '/\[(.*?)\]\([^)]*\)/',    // Links
-            '/!\[.*?\]\([^)]*\)/',     // Images
+            // Code blocks first (preserve content, remove formatting)
+            '/```[a-zA-Z]*\n?([\s\S]*?)\n?```/',  // Fenced code blocks
+            '/`([^`]+)`/',                        // Inline code
+
+            // Bold before italic (order matters!)
+            '/\*\*\*([^*]+)\*\*\*/',             // Bold italic
+            '/\*\*([^*]+)\*\*/',                 // Bold
+            '/\*([^*]+)\*/',                     // Italic
+
+            // Other formatting
+            '/~~([^~]+)~~/',                     // Strikethrough
+            '/^#{1,6}\s+/m',                     // Headers
+
+            // Links and images
+            '/!\[[^\]]*\]\([^)]*\)/',           // Images
+            '/\[([^\]]+)\]\([^)]*\)/',          // Links
+
+            // Lists and structure
+            '/^[\s]*[-*+]\s+/m',                // Unordered lists
+            '/^[\s]*\d+\.\s+/m',                // Ordered lists
+            '/^>\s*/m',                         // Blockquotes
+            '/^\|.*\|$/m',                      // Table rows
+            '/^[-:| ]+$/m',                     // Table separators
+            '/^---+$/m',                        // Horizontal rules
         ];
 
-        $content = preg_replace($patterns, ['$1', '$1', '$1', '$1', '', '$1', ''], $content);
+        $replacements = [
+            '$1',    // Code blocks - keep content
+            '$1',    // Inline code - keep content
+            '$1',    // Bold italic - keep text
+            '$1',    // Bold - keep text
+            '$1',    // Italic - keep text
+            '$1',    // Strikethrough - keep text
+            '',      // Headers - remove markup
+            '',      // Images - remove completely
+            '$1',    // Links - keep link text
+            '',      // Unordered lists - remove bullets
+            '',      // Ordered lists - remove numbers
+            '',      // Blockquotes - remove >
+            '',      // Table rows - remove (will be messy but searchable)
+            '',      // Table separators - remove
+            '',      // Horizontal rules - remove
+        ];
+
+        $content = preg_replace($patterns, $replacements, $content);
 
         // Clean up whitespace and truncate
         $content = preg_replace('/\s+/', ' ', trim($content));

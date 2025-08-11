@@ -111,4 +111,31 @@ return [
     'search' => [
         'max_content_length' => env('LEMME_SEARCH_MAX_CONTENT_LENGTH', 0), // 0 = no limit (index full content)
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Logo
+    |--------------------------------------------------------------------------
+    |
+    | Configure how the logo in the documentation layout is rendered.
+    | Supported types:
+    | - view  : renders a Blade view (default existing partial)
+    | - image : renders an <img> tag (provide image path relative to public/ or full URL)
+    | - text  : renders plain text inside a <span>
+    |
+    | You can override via env vars, e.g.:
+    |   LEMME_LOGO_TYPE=image
+    |   LEMME_LOGO_IMAGE="images/logo.svg"
+    |   LEMME_LOGO_ALT="My Project"
+    |
+    */
+    'logo' => [
+        'type' => env('LEMME_LOGO_TYPE', 'view'),
+        'view' => env('LEMME_LOGO_VIEW', 'lemme::partials.logo'),
+        'image' => env('LEMME_LOGO_IMAGE', null),
+        'text' => env('LEMME_LOGO_TEXT', null),
+        'alt' => env('LEMME_LOGO_ALT', 'Logo'),
+        // Additional CSS classes applied to the root element of image/text variants
+        'classes' => env('LEMME_LOGO_CLASSES', 'h-6 text-black dark:text-white'),
+    ],
 ];

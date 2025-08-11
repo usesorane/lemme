@@ -31,7 +31,26 @@
         <div class="bg-white dark:bg-zinc-900 flex h-14 items-center justify-between gap-8 px-4 sm:px-6">
             <div class="flex-shrink-0">
                 <a class="" aria-label="Home" href="/">
-                    @include('lemme::partials.logo')
+                    @php($logo = config('lemme.logo'))
+                    @switch($logo['type'] ?? 'view')
+                        @case('image')
+                            @if(!empty($logo['image']))
+                                <img src="{{ \Illuminate\Support\Str::startsWith($logo['image'], ['http://', 'https://', '/']) ? $logo['image'] : asset($logo['image']) }}" alt="{{ $logo['alt'] ?? 'Logo' }}" class="{{ $logo['classes'] ?? 'h-5' }}" />
+                            @else
+                                @include('lemme::partials.logo')
+                            @endif
+                            @break
+                        @case('text')
+                            @if(!empty($logo['text']))
+                                <span class="block font-semibold {{ $logo['classes'] ?? '' }}">{{ $logo['text'] }}</span>
+                            @else
+                                @include('lemme::partials.logo')
+                            @endif
+                            @break
+                        @case('view')
+                        @default
+                            @include($logo['view'] ?? 'lemme::partials.logo')
+                    @endswitch
                 </a>
             </div>
             <!-- Search Bar -->
