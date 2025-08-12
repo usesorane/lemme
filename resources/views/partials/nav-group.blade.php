@@ -1,4 +1,3 @@
-{{-- Navigation Group Partial --}}
 {{-- 
 Parameters:
 - $group: array - the group data with title, children, etc.
