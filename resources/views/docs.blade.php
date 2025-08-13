@@ -85,10 +85,7 @@
                                     :active="$page['slug'] === $item['slug']"
                                 />
                             @elseif ($item['type'] === 'group')
-                                @include('lemme::partials.nav-group', [
-                                    'group' => $item,
-                                    'currentPageSlug' => $page['slug']
-                                ])
+                                <x-lemme::nav-group :group="$item" :current-page-slug="$page['slug']" />
                             @endif
                         @endforeach
                     </ul>
