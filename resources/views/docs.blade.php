@@ -104,7 +104,7 @@
         <div class="max-xl:hidden">
             <div class="sticky top-14 max-h-[calc(100svh-3.5rem)] overflow-x-hidden px-6 pt-10 pb-24">
                 <h3 class="text-xs font-semibold text-zinc-900 dark:text-white">On this page</h3>
-                <x-lemme::table-of-contents-navigation class="mt-3">
+                <x-lemme::table-of-contents-navigation class="mt-3" data-toc="true">
                     <ul class="space-y-1">
                         @if (isset($page['headings']) && count($page['headings']) > 0)
                             @foreach($page['headings'] as $heading)
@@ -126,6 +126,94 @@
     <!-- modals -->
     @include('lemme::partials.search-modal')
 
+    <script>
+        // IntersectionObserver driven Table of Contents highlighting
+        document.addEventListener('DOMContentLoaded', () => {
+            const toc = document.querySelector('nav[data-toc]');
+            if (!toc) return;
+
+            const controls = Array.from(toc.querySelectorAll('[data-slot=control]'));
+            if (!controls.length) return;
+
+            // Build heading map (id -> element + control li)
+            const headings = controls.map(control => {
+                const link = control.querySelector('[data-slot=link]');
+                if (!link) return null;
+                const href = link.getAttribute('href') || '';
+                if (!href.startsWith('#')) return null;
+                const id = href.slice(1);
+                const el = document.getElementById(id);
+                if (!el) return null;
+                return { id, el, control };
+            }).filter(Boolean);
+
+            if (!headings.length) return;
+
+            let currentActive = controls.find(c => c.querySelector('[data-slot=link][aria-current="page"]')) || null;
+            let suppressUntil = 0; // timestamp until which auto activation is suppressed
+            const state = new Map(); // id -> {isIntersecting, top}
+
+            function activate(control) {
+                if (!control || currentActive === control) return;
+                controls.forEach(c => {
+                    c.dispatchEvent(new CustomEvent(c === control ? 'link:active' : 'link:inactive', { bubbles: false }));
+                });
+                currentActive = control;
+            }
+
+            function pickActive() {
+                if (Date.now() < suppressUntil) return; // Temporary suppression window
+                // Prefer headings currently intersecting; pick the one closest to top (smallest positive or largest negative top)
+                const intersecting = headings.filter(h => state.get(h.id)?.isIntersecting);
+                let candidate = null;
+                if (intersecting.length) {
+                    intersecting.sort((a, b) => (state.get(a.id).top) - (state.get(b.id).top));
+                    candidate = intersecting[0];
+                } else {
+                    // Fallback: heading whose top is just above current scroll position
+                    const scrollY = window.scrollY || window.pageYOffset;
+                    const viewportOffset = 16; // small padding
+                    const before = headings.filter(h => (h.el.getBoundingClientRect().top + scrollY) <= scrollY + viewportOffset);
+                    if (before.length) {
+                        before.sort((a, b) => (a.el.offsetTop - b.el.offsetTop));
+                        candidate = before[before.length - 1];
+                    } else {
+                        candidate = headings[0];
+                    }
+                }
+                if (candidate) activate(candidate.control);
+            }
+
+            // Observer to track when headings enter/leave; rootMargin raises earlier activation
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    state.set(entry.target.id, { isIntersecting: entry.isIntersecting, top: entry.boundingClientRect.top });
+                });
+                // Use rAF to batch DOM updates
+                if (!pickActive._scheduled) {
+                    pickActive._scheduled = true;
+                    requestAnimationFrame(() => { pickActive(); pickActive._scheduled = false; });
+                }
+            }, {
+                root: null,
+                // When the heading crosses 30% from the top we treat it as active (bottom margin pushes trigger earlier)
+                rootMargin: '0px 0px -70% 0px',
+                threshold: [0, 1]
+            });
+
+            headings.forEach(h => observer.observe(h.el));
+
+            // User interaction: clicking a TOC link should lock the active state and stop auto updates
+            controls.forEach(control => {
+                const link = control.querySelector('[data-slot=link]');
+                if (!link) return;
+                link.addEventListener('click', () => {
+                    // Keep clicked active; suppress auto-updates for a short period while the browser scrolls to anchor
+                    suppressUntil = Date.now() + 800; // ms
+                }, { passive: true });
+            });
+        });
+    </script>
     @livewireScripts
 </body>
 </html>
