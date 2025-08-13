@@ -2,6 +2,7 @@
 
 namespace Sorane\Lemme;
 
+use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
 use Sorane\Lemme\Commands\LemmeClearCommand;
 use Sorane\Lemme\Commands\LemmeInstallCommand;
@@ -32,6 +33,9 @@ class LemmeServiceProvider extends PackageServiceProvider
         $this->app->singleton('lemme', function () {
             return new Lemme;
         });
+
+        // Register Blade Components
+        Blade::componentNamespace('Sorane\\Lemme\\Views\\Components', 'lemme');
 
         // Load the Livewire component
         Livewire::component('lemme.search-component', \Sorane\Lemme\Livewire\SearchComponent::class);

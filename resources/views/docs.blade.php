@@ -79,12 +79,11 @@
                     <ul class="space-y-1">
                         @foreach ($navigation as $item)
                             @if ($item['type'] === 'page')
-                                @include('lemme::partials.nav-link', [
-                                    'href' => $item['url'],
-                                    'title' => $item['title'],
-                                    'active' => $page['slug'] === $item['slug'],
-                                    'showActiveIndicator' => true
-                                ])
+                                <x-lemme::nav-link
+                                    :href="$item['url']"
+                                    :title="$item['title']"
+                                    :active="$page['slug'] === $item['slug']"
+                                />
                             @elseif ($item['type'] === 'group')
                                 @include('lemme::partials.nav-group', [
                                     'group' => $item,
@@ -108,21 +107,20 @@
         <div class="max-xl:hidden">
             <div class="sticky top-14 max-h-[calc(100svh-3.5rem)] overflow-x-hidden px-6 pt-10 pb-24">
                 <h3 class="text-xs font-semibold text-zinc-900 dark:text-white">On this page</h3>
-                <nav class="mt-3">
+                <x-lemme::table-of-contents-navigation class="mt-3">
                     <ul class="space-y-1">
                         @if (isset($page['headings']) && count($page['headings']) > 0)
                             @foreach($page['headings'] as $heading)
-                                @include('lemme::partials.nav-link', [
-                                    'href' => '#' . $heading['id'],
-                                    'title' => $heading['text'],
-                                    'active' => false,
-                                    'showActiveIndicator' => true,
-                                    'class' => $heading['class'] ?? ''
-                                ])
+                                <x-lemme::nav-link
+                                    :href="'#' . $heading['id']"
+                                    :title="$heading['text']"
+                                    :active="$loop->first"
+                                    :class="$heading['class'] ?? ''"
+                                />
                             @endforeach
                         @endif
                     </ul>
-                </nav>
+                </x-lemme::table-of-contents-navigation>
             </div>
         </div>
     </div>

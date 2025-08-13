@@ -32,12 +32,11 @@ $isExpanded = $hasActiveChild($group['children'], $currentPageSlug);
     <ul class="mt-3 space-y-1 ml-2">
         @foreach ($group['children'] as $child)
             @if ($child['type'] === 'page')
-                @include('lemme::partials.nav-link', [
-                    'href' => $child['url'],
-                    'title' => $child['title'],
-                    'active' => $currentPageSlug === $child['slug'],
-                    'showActiveIndicator' => true
-                ])
+                <x-lemme::nav-link
+                    :href="$child['url']"
+                    :title="$child['title']"
+                    :active="$currentPageSlug === $child['slug']"
+                />
             @elseif ($child['type'] === 'group')
                 @include('lemme::partials.nav-group', [
                     'group' => $child,
