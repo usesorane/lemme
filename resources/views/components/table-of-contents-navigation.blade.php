@@ -2,22 +2,27 @@
   x-data="{
     init() {
       $nextTick(() => {
+        const controls = Array.from(this.$el.querySelectorAll('[data-slot=control]'));
+        if (!controls.length) return;
+
+        const first = controls[0];
         const hash = window.location.hash;
-        if (!hash) return;
 
-        const targetLink = this.$el.querySelector(`[data-slot=link][href='${hash}']`);
-        if (!targetLink) return;
-        
-        const targetControl = targetLink.closest('[data-slot=control]');
-        if (!targetControl) return;
+        if (hash) {
+          const targetLink = this.$el.querySelector(`[data-slot=link][href='${hash}']`);
+          if (targetLink) {
+            const targetControl = targetLink.closest('[data-slot=control]');
+            if (targetControl) {
+              controls.forEach(c => { if (c !== targetControl) c.dispatchEvent(new CustomEvent('link:inactive', { bubbles: false })); });
+              targetControl.dispatchEvent(new CustomEvent('link:active', { bubbles: false }));
+              return;
+            }
+          }
+        }
 
-        // Deactivate other controls
-        this.$el.querySelectorAll('[data-slot=control]').forEach(c => {
-          if (c !== targetControl) c.dispatchEvent(new CustomEvent('link:inactive', { bubbles: false }));
-        });
-        
-        // Activate target
-        targetControl.dispatchEvent(new CustomEvent('link:active', { bubbles: false }));
+        if (first) {
+          first.dispatchEvent(new CustomEvent('link:active', { bubbles: false }));
+        }
       });
     }
   }"
