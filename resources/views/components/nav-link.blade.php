@@ -1,7 +1,8 @@
 <li class="relative flex items-center" 
     data-slot="control"
     x-data="{ active: {{ $active ? 'true' : 'false' }} }"
-    x-on:click="active = true"
+    @if ($isReactive) x-on:click="active = true" @endif
+    @link:active="active = true"
     @link:inactive="active = false"
 >
     @if ($showActiveIndicator)

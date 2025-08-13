@@ -111,8 +111,9 @@
                                 <x-lemme::nav-link
                                     :href="'#' . $heading['id']"
                                     :title="$heading['text']"
-                                    :active="$loop->first"
+                                    :active="false"
                                     :class="$heading['class'] ?? ''"
+                                    :is-reactive="true"
                                 />
                             @endforeach
                         @endif

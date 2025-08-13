@@ -12,6 +12,7 @@ class NavLink extends Component
         public string $title,
         public bool $active = false,
         public bool $showActiveIndicator = true,
+        public bool $isReactive = false,
     ) {}
 
     public function render(): View
