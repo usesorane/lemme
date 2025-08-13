@@ -12,8 +12,6 @@ class NavLink extends Component
         public string $title,
         public bool $active = false,
         public bool $showActiveIndicator = true,
-        public string $activeClasses = 'bg-zinc-800/2.5 dark:bg-white/2.5',
-        public string $inactiveClasses = 'hover:bg-zinc-800/2.5 dark:hover:bg-white/2.5',
     ) {}
 
     public function render(): View
