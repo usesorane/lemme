@@ -123,7 +123,7 @@ class LemmeSearch {
             const after = highlightedText.substring(end + 1);
 
             highlightedText = before +
-                '<mark class="underline bg-transparent text-emerald-500">' +
+                '<mark class="underline bg-transparent text-lemme-accent">' +
                 match +
                 '</mark>' +
                 after;

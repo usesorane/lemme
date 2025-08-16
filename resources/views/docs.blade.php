@@ -150,7 +150,20 @@
             if (!headings.length) return;
 
             let currentActive = controls.find(c => c.querySelector('[data-slot=link][aria-current="page"]')) || null;
-            let suppressUntil = 0; // timestamp until which auto activation is suppressed
+            let suppressUntil = 0; // timestamp until which auto activation is suppressed (after clicks)
+            let lockedToHash = false; // when true, initial hash-based activation should not be overridden yet
+            let initialScrollY = window.scrollY || window.pageYOffset;
+            const releaseDistance = 32; // px user must scroll before releasing hash lock
+
+            (function initHashLock(){
+                const hash = window.location.hash;
+                if (!hash) return;
+                const id = hash.slice(1);
+                if (!id) return;
+                if (document.getElementById(id)) {
+                    lockedToHash = true; // table-of-contents-navigation handled activation already
+                }
+            })();
             const state = new Map(); // id -> {isIntersecting, top}
 
             function activate(control) {
@@ -162,7 +175,8 @@
             }
 
             function pickActive() {
-                if (Date.now() < suppressUntil) return; // Temporary suppression window
+                if (lockedToHash) return; // Respect initial explicit hash selection
+                if (Date.now() < suppressUntil) return; // Temporary suppression window after click
                 // Prefer headings currently intersecting; pick the one closest to top (smallest positive or largest negative top)
                 const intersecting = headings.filter(h => state.get(h.id)?.isIntersecting);
                 let candidate = null;
@@ -203,6 +217,18 @@
 
             headings.forEach(h => observer.observe(h.el));
 
+            // Release the hash lock once user scrolls meaningfully
+            window.addEventListener('scroll', () => {
+                if (lockedToHash) {
+                    const delta = Math.abs((window.scrollY || window.pageYOffset) - initialScrollY);
+                    if (delta > releaseDistance) {
+                        lockedToHash = false;
+                        // Force recompute immediately after lock release
+                        pickActive();
+                    }
+                }
+            }, { passive: true });
+
             // User interaction: clicking a TOC link should lock the active state and stop auto updates
             controls.forEach(control => {
                 const link = control.querySelector('[data-slot=link]');
@@ -214,6 +240,7 @@
             });
         });
     </script>
+
     @livewireScripts
 </body>
 </html>

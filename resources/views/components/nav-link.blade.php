@@ -1,4 +1,4 @@
-<li class="relative flex items-center" 
+<li class="relative flex items-center"
     data-slot="control"
     x-data="{ active: {{ $active ? 'true' : 'false' }} }"
     @if ($isReactive) x-on:click="active = true" @endif
@@ -6,7 +6,7 @@
     @link:inactive="active = false"
 >
     @if ($showActiveIndicator)
-        <div class="h-6 w-[1px] mr-0.5 rounded bg-transparent data-active:bg-pink-400/90"
+        <div class="h-6 w-[1px] mr-0.5 rounded bg-transparent data-active:bg-lemme-accent/90"
             data-slot="indicator"
             @if ($active) data-active="true" @endif
             :data-active="active"
