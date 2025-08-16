@@ -33,6 +33,10 @@ class DocsController extends Controller
         $navigation = Lemme::getNavigation();
         $html = Lemme::getPageHtml($slug);
 
+        // Determine platform
+        $ua = (string) $request->header('User-Agent', '');
+        $isMac = (bool) preg_match('/Mac|iPhone|iPad|iPod/i', $ua);
+
         return view('lemme::docs', [
             'page' => $page,
             'html' => $html,
@@ -41,6 +45,7 @@ class DocsController extends Controller
             'siteTitle' => config('lemme.site_title', 'Documentation'),
             'siteDescription' => config('lemme.site_description', 'Project Documentation'),
             'theme' => config('lemme.theme', 'default'),
+            'isMac' => $isMac,
         ]);
     }
 

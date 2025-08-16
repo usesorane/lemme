@@ -25,7 +25,7 @@
 
     <script>!function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');if('system'===e||(!e&&true)){var t='(prefers-color-scheme: dark)',m=window.matchMedia(t);if(m.media!==t||m.matches){d.style.colorScheme = 'dark';c.add('dark')}else{d.style.colorScheme = 'light';c.add('light')}}else if(e){c.add(e|| '')}if(e==='light'||e==='dark')d.style.colorScheme=e}catch(e){}}()</script>
 </head>
-<body x-data="{ searchModalOpen: false, isMac: (function(){ try { const ua = navigator.userAgent || ''; const plat = navigator.platform || ''; return /Mac|iPhone|iPad|iPod/i.test(ua) || /Mac|iPhone|iPad|iPod/i.test(plat); } catch (e) { return false; } })() }" @keydown.cmd.k.prevent="searchModalOpen = true" @keydown.ctrl.k.prevent="searchModalOpen = true">
+<body x-data="{ searchModalOpen: false }" @keydown.cmd.k.prevent="searchModalOpen = true" @keydown.ctrl.k.prevent="searchModalOpen = true">
     <!-- Top Navigation -->
     <div class="fixed inset-x-0 top-0 z-10 border-b border-gray-950/5 dark:border-white/10">
         <div class="bg-white dark:bg-zinc-900 flex h-14 items-center justify-between gap-8 px-4 sm:px-6">
@@ -60,12 +60,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12.01 12a4.25 4.25 0 1 0-6.02-6 4.25 4.25 0 0 0 6.02 6Zm0 0 3.24 3.25"></path>
                     </svg>Find something...
                     <kbd class="ml-auto text-2xs text-zinc-400 dark:text-zinc-500">
-                        <template x-if="isMac">
+                        @if ($isMac)
                             <kbd class="font-sans">⌘K</kbd>
-                        </template>
-                        <template x-if="!isMac">
+                        @else
                             <kbd class="font-sans">Ctrl K</kbd>
-                        </template>
+                        @endif
                     </kbd>
                 </button>
             </div>
