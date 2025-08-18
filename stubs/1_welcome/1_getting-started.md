@@ -27,4 +27,4 @@ docs/
 
 ## Next Steps
 
-Check out [Organizing Content](/organizing-content) to learn how to structure your documentation effectively.
+Check out [Organizing Content](/docs/organizing-content) to learn how to structure your documentation effectively.

@@ -4,7 +4,7 @@
             {{ $group['title'] }}
         </h3>
     </div>
-    <ul class="mt-3 space-y-1 ml-2">
+    <ul class="mt-3 ml-4 border-l border-l-lemme-accent/20 space-y-1">
         @foreach ($group['children'] as $child)
             @if ($child['type'] === 'page')
                 <x-lemme::nav-link :href="$child['url']" :title="$child['title']" :active="$currentPageSlug === $child['slug']" />

@@ -140,7 +140,7 @@
 </div>
 
 <!-- Main Grid Layout -->
-<div class="grid min-h-screen pt-14 lg:grid-cols-[300px_1fr] xl:grid-cols-[300px_1fr_300px]">
+<div class="grid min-h-screen pt-14 lg:grid-cols-[300px_1fr] xl:grid-cols-[300px_1fr_350px]">
     <!-- Sidebar Navigation -->
     <div class="max-lg:hidden border-r border-zinc-900/10 dark:border-white/10">
         <div class="sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto p-6">
@@ -151,6 +151,7 @@
                             <x-lemme::nav-link
                                     :href="$item['url']"
                                     :title="$item['title']"
+                                    :show-active-indicator="false"
                                     :active="$page['slug'] === $item['slug']"
                             />
                         @elseif ($item['type'] === 'group')
@@ -171,7 +172,7 @@
 
     <!-- Table of Contents -->
     <div class="max-xl:hidden">
-        <div class="sticky top-14 max-h-[calc(100svh-3.5rem)] overflow-x-hidden px-6 pt-10 pb-24">
+        <div class="sticky top-14 max-h-[calc(100svh-3.5rem)] overflow-x-visible px-6 pt-10 pb-24">
             <h3 class="text-xs font-semibold text-zinc-900 dark:text-white">On this page</h3>
             <x-lemme::table-of-contents-navigation class="mt-3" data-toc="true">
                 <ul class="space-y-1">

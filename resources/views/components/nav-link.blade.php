@@ -6,7 +6,7 @@
     @link:inactive="active = false"
 >
     @if ($showActiveIndicator)
-        <div class="h-6 w-[1px] mr-0.5 rounded bg-transparent data-active:bg-lemme-accent/90"
+        <div class="h-6 w-[1px] -ml-[1px] mr-3 rounded bg-transparent data-active:bg-lemme-accent/90 z-10 flex-shrink-0"
             data-slot="indicator"
             @if ($active) data-active="true" @endif
             :data-active="active"

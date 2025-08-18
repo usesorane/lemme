@@ -4,8 +4,8 @@ This is your documentation homepage. You can edit this file at `docs/index.md`.
 
 ## Getting Started
 
-- [Getting Started](/getting-started) - Learn how Lemme works
-- [Organizing Content](/organizing-content) - Structure your docs
+- [Getting Started](/docs/getting-started) - Learn how Lemme works
+- [Organizing Content](/docs/organizing-content) - Structure your docs
 
 ## Features
 
