@@ -2,12 +2,16 @@
 
 namespace Sorane\Lemme\Views\Components;
 
+use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
 class MobileNavigation extends Component
 {
-    public function __construct() {}
+    public function __construct(
+        public Collection $navigation = new Collection,
+        public string $currentPageSlug = '',
+    ) {}
 
     public function render(): View
     {

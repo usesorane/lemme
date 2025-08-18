@@ -194,7 +194,7 @@
 
 <!-- modals -->
 @include('lemme::partials.search-modal')
-<x-lemme::mobile-navigation />
+<x-lemme::mobile-navigation :navigation="$navigation" :current-page-slug="$page['slug']" />
 
 <script>
     // IntersectionObserver driven Table of Contents highlighting
