@@ -1,30 +1,36 @@
-<div x-on:keydown.escape="mobileNavOpen = false"
-     x-on:click.away="mobileNavOpen = false"
+<div x-cloak x-show="mobileNavOpen"
+     x-transition.opacity
+     @keydown.escape.window="mobileNavOpen = false"
      class="fixed inset-0 top-14 z-50 lg:hidden" role="dialog"
      tabindex="-1"
      aria-modal="true"
-     x-bind:data-open="mobileNavOpen"
-     x-bind:data-closed="!mobileNavOpen">
+     x-bind:aria-hidden="!mobileNavOpen">
 
     <!-- backdrop -->
-    <div class="fixed inset-0  top-14 bg-zinc-400/20 backdrop-blur-xs data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in dark:bg-black/40"
-         aria-hidden="true" data-open=""></div>
+    <div class="fixed inset-0 top-14 bg-zinc-400/20 backdrop-blur-xs dark:bg-black/40"
+         aria-hidden="true"
+         @click="mobileNavOpen = false"></div>
 
     <!-- panel -->
-    <div data-open="">
-        <div class="fixed top-14 bottom-0 left-0 w-full overflow-y-auto bg-white px-4 pt-6 pb-4 shadow-lg ring-1 shadow-zinc-900/10 ring-zinc-900/7.5 duration-500 ease-in-out data-closed:-translate-x-full min-[416px]:max-w-sm sm:px-6 sm:pb-10 dark:bg-zinc-900 dark:ring-zinc-800"
-             style="">
+    <div>
+        <div class="fixed top-14 bottom-0 left-0 w-full overflow-y-auto bg-white px-4 pt-6 pb-4 shadow-lg ring-1 shadow-zinc-900/10 ring-zinc-900/7.5 min-[416px]:max-w-sm sm:px-6 sm:pb-10 dark:bg-zinc-900 dark:ring-zinc-800"
+             x-transition:enter="transform transition ease-out duration-200"
+             x-transition:enter-start="-translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transform transition ease-in duration-150"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="-translate-x-full">
             <nav>
                 <ul role="list">
                     <li class="md:hidden">
                         <a class="block py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                           type="button" data-headlessui-state="" href="/">API</a></li>
+                           type="button" href="/">API</a></li>
                     <li class="md:hidden"><a
                                 class="block py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                type="button" data-headlessui-state="" href="#">Documentation</a></li>
+                                type="button" href="#">Documentation</a></li>
                     <li class="md:hidden"><a
                                 class="block py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                type="button" data-headlessui-state="" href="#">Support</a></li>
+                                type="button" href="#">Support</a></li>
                     <li class="relative mt-6 md:mt-0"><h2 class="text-xs font-semibold text-zinc-900 dark:text-white">
                             Guides</h2>
                         <div class="relative mt-3 pl-2">
@@ -35,42 +41,42 @@
                             <ul role="list" class="border-l border-transparent">
                                 <li class="relative"><a aria-current="page"
                                                         class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-900 dark:text-white"
-                                                        type="button" data-headlessui-state="" href="/"><span
+                                                        type="button" href="/"><span
                                                 class="truncate">Introduction</span></a>
                                     <ul role="list" style="opacity: 1;">
                                         <li>
                                             <a class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-7 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                               type="button" data-headlessui-state="" href="/#guides"><span
+                                               type="button" href="/#guides"><span
                                                         class="truncate">Guides</span></a></li>
                                         <li>
                                             <a class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-7 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                               type="button" data-headlessui-state="" href="/#resources"><span
+                                               type="button" href="/#resources"><span
                                                         class="truncate">Resources</span></a></li>
                                     </ul>
                                 </li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/quickstart"><span
+                                            type="button" href="/quickstart"><span
                                                 class="truncate">Quickstart</span></a></li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/sdks"><span class="truncate">SDKs</span></a>
+                                            type="button" href="/sdks"><span class="truncate">SDKs</span></a>
                                 </li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/authentication"><span
+                                            type="button" href="/authentication"><span
                                                 class="truncate">Authentication</span></a></li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/pagination"><span
+                                            type="button" href="/pagination"><span
                                                 class="truncate">Pagination</span></a></li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/errors"><span
+                                            type="button" href="/errors"><span
                                                 class="truncate">Errors</span></a></li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/webhooks"><span
+                                            type="button" href="/webhooks"><span
                                                 class="truncate">Webhooks</span></a></li>
                             </ul>
                         </div>
@@ -82,23 +88,23 @@
                             <ul role="list" class="border-l border-transparent">
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/contacts"><span
+                                            type="button" href="/contacts"><span
                                                 class="truncate">Contacts</span></a></li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/conversations"><span
+                                            type="button" href="/conversations"><span
                                                 class="truncate">Conversations</span></a></li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/messages"><span
+                                            type="button" href="/messages"><span
                                                 class="truncate">Messages</span></a></li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/groups"><span
+                                            type="button" href="/groups"><span
                                                 class="truncate">Groups</span></a></li>
                                 <li class="relative"><a
                                             class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                            type="button" data-headlessui-state="" href="/attachments"><span
+                                            type="button" href="/attachments"><span
                                                 class="truncate">Attachments</span></a></li>
                             </ul>
                         </div>
