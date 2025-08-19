@@ -3,21 +3,11 @@
 namespace Sorane\Lemme\Tests;
 
 use Livewire\Livewire;
-use Orchestra\Testbench\TestCase;
 use Sorane\Lemme\Facades\Lemme;
-use Sorane\Lemme\LemmeServiceProvider;
 use Sorane\Lemme\Livewire\SearchComponent;
 
 class SearchComponentTest extends TestCase
 {
-    protected function getPackageProviders($app)
-    {
-        return [
-            \Livewire\LivewireServiceProvider::class,
-            LemmeServiceProvider::class,
-        ];
-    }
-
     protected function setUp(): void
     {
         parent::setUp();

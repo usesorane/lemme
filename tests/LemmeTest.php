@@ -3,20 +3,10 @@
 namespace Sorane\Lemme\Tests;
 
 use Illuminate\Support\Facades\File;
-use Orchestra\Testbench\TestCase;
 use Sorane\Lemme\Facades\Lemme;
-use Sorane\Lemme\LemmeServiceProvider;
 
 class LemmeTest extends TestCase
 {
-    protected function getPackageProviders($app)
-    {
-        return [
-            \Livewire\LivewireServiceProvider::class,
-            LemmeServiceProvider::class,
-        ];
-    }
-
     protected function getPackageAliases($app)
     {
         return [

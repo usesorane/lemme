@@ -1,7 +1,6 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use Sorane\Lemme\Lemme;
+namespace Sorane\Lemme\Tests;
 
 class NavigationGroupingTest extends TestCase
 {
