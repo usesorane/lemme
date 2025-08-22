@@ -12,14 +12,18 @@ Lemme is a Laravel package that facilitates the creation of beautiful documentat
 ## Features
 
 - 📝 **Markdown-based**: Write your documentation in simple Markdown files
-- 🎨 **Beautiful UI**: Modern design with Tailwind CSS 4
-- 📱 **Responsive**: Works perfectly on all devices
-- ⚡ **Fast**: Built-in caching for optimal performance
-- 🎯 **Flexible routing**: Use subdomains or route prefixes
-- 🔧 **Configurable**: Customize themes, directories, and more
-- 🚀 **Laravel-native**: Seamlessly integrates with your Laravel application
-- ✨ **Syntax highlighting**: Automatic code highlighting powered by Shiki
-- 📁 **Directory-based grouping**: Organize navigation automatically using folder structure
+- 🎨 **Beautiful UI**: Modern design (Tailwind CSS 4 + dark mode) out of the box
+- 📱 **Responsive**: Works on all devices
+- ⚡ **Fast**: Built-in caching (pages, HTML, search) with rotation
+- 🎯 **Flexible routing**: Serve via route prefix (default) or a subdomain
+- 🔧 **Configurable**: Directories, navigation sorting/grouping, logo rendering, search limits
+- 🚀 **Laravel-native**: Service provider, facade, Livewire component
+- ✨ **Syntax highlighting**: Shiki-driven code highlighting (light & dark themes)
+- 📁 **Directory grouping**: Automatic navigation tree from folder structure
+- 🔍 **Search-ready**: Plain‑text index built from rendered Markdown
+- 🧭 **Anchors**: Stable heading IDs with automatic de‑duplication
+
+> Note: The `theme` config key is currently a placeholder (only the bundled default + dark mode variant ships). Extra named themes are not yet implemented.
 
 ## Installation
 
@@ -48,7 +52,7 @@ This will:
 - Publish the compiled Tailwind CSS assets
 - Set up the necessary configuration
 
-**Example structure created:**
+**Example navigation structure (illustrative):**
 ```
 docs/
 ├── index.md
@@ -66,6 +70,18 @@ docs/
     ├── 1_deployment.md
     └── 2_troubleshooting.md
 ```
+
+**What the installer actually creates:**
+
+```
+docs/
+├── index.md
+└── 1_welcome/
+    ├── 1_getting-started.md
+    └── 2_organizing-content.md
+```
+
+Add further folders/files manually following the same naming conventions.
 
 ## Configuration
 
@@ -112,8 +128,8 @@ return [
     | Theme
     |--------------------------------------------------------------------------
     |
-    | The theme to use for your documentation site.
-    | Available themes: 'default', 'dark', 'minimal'
+    | Placeholder for future theme variants. (Currently only the bundled
+    | default style + dark mode toggle is provided.)
     |
     */
     'theme' => env('LEMME_THEME', 'default'),
@@ -293,17 +309,19 @@ Slugs determine the URL path for your documentation pages:
   - Removes number prefixes (e.g., `1_`, `2-`, `10_`)
   - Excludes directory names (only uses the filename)
 
+All URL examples below assume the default route prefix (`/docs`). Adjust paths if you change or remove the prefix.
+
 **Examples:**
 ```
-docs/1_getting-started/2_installation.md
-├─ Default slug: "installation" 
+ docs/1_getting-started/2_installation.md
+ ├─ Default slug: "installation"
 ├─ URL: /installation
 
-docs/api/3-authentication.md  
+ docs/api/3-authentication.md  
 ├─ Default slug: "authentication"
 ├─ URL: /authentication
 
-docs/guides/advanced-features.md
+ docs/guides/advanced-features.md
 ├─ Default slug: "advanced-features"  
 ├─ URL: /advanced-features
 ```
@@ -326,7 +344,7 @@ Special handling applies to `index.md` files:
 - Number prefixes on the directory (e.g. `1_guide/index.md`) are stripped before generating the slug: `1_guide/index.md` -> `guide`.
 - Regular files still derive their slug from their own filename only (directories are never prefixed onto slugs except for the nested index rule above).
 
-This keeps URLs short and predictable: `docs/guide/index.md` -> `/guide`, `docs/guide/intro.md` -> `/intro`.
+This keeps URLs short and predictable: `docs/guide/index.md` -> `/docs/guide`, `docs/guide/intro.md` -> `/docs/intro` (note: prefix included). Only root `index.md` is served at `/docs` itself.
 
 ##### Duplicate Slug Handling
 
@@ -339,15 +357,15 @@ Fail‑fast detection prevents silently colliding pages and unexpected content s
 
 ##### Quick Reference Summary
 
-| Case | Example Path | Generated Slug |
-|------|--------------|----------------|
-| Root index | `docs/index.md` | `` (empty/home) |
-| Nested index | `docs/guide/index.md` | `guide` |
-| Numbered nested index | `docs/1_guide/index.md` | `guide` |
-| Regular file | `docs/guide/intro.md` | `intro` |
-| CamelCase filename | `docs/CamelCaseFile.md` | `camel-case-file` |
-| With frontmatter slug | `slug: custom` | `custom` |
-| Collision (two foo.md) | `one/foo.md`, `two/foo.md` | Error (must resolve) |
+| Case | Example Path | Generated Slug | Example URL (default prefix) |
+|------|--------------|----------------|------------------------------|
+| Root index | `docs/index.md` | `` (empty) | `/docs` |
+| Nested index | `docs/guide/index.md` | `guide` | `/docs/guide` |
+| Numbered nested index | `docs/1_guide/index.md` | `guide` | `/docs/guide` |
+| Regular file | `docs/guide/intro.md` | `intro` | `/docs/intro` |
+| CamelCase filename | `docs/CamelCaseFile.md` | `camel-case-file` | `/docs/camel-case-file` |
+| With frontmatter slug | `slug: custom` | `custom` | `/docs/custom` |
+| Collision (two foo.md) | `one/foo.md`, `two/foo.md` | Error | – |
 
 ---
 
@@ -402,15 +420,20 @@ You can disable grouping in the configuration if you prefer a flat navigation st
 
 By default, your documentation will be available at:
 
-- **Route prefix**: `https://yoursite.com/docs` (default)
-- **Subdomain**: `https://docs.yoursite.com` (if using subdomain routing)
+- **Route prefix (default)**: `https://yoursite.com/docs`
+- **Subdomain**: `https://docs.yoursite.com` (set `route_prefix=null` and `subdomain=docs`)
+
+Precedence: If both `subdomain` and `route_prefix` are set, the route prefix wins (a notice is logged) and subdomain routing is ignored.
 
 ### API Access
 
-Lemme provides JSON API endpoints for headless usage:
+Lemme provides JSON API endpoints for headless usage. Paths depend on your routing mode:
 
-- `GET /api` - Get all pages and navigation
-- `GET /api/{slug}` - Get a specific page
+| Mode | Index Endpoint | Page Endpoint |
+|------|----------------|---------------|
+| Route prefix (`docs`) | `/docs/api` | `/docs/api/{slug}` |
+| Custom prefix (`handbook`) | `/handbook/api` | `/handbook/api/{slug}` |
+| Subdomain (`docs.`) | `https://docs.yoursite.com/api` | `https://docs.yoursite.com/api/{slug}` |
 
 **Example use cases:**
 - Build custom documentation frontends
@@ -420,24 +443,43 @@ Lemme provides JSON API endpoints for headless usage:
 
 ### Commands
 
-- `php artisan lemme:install` - Install and set up documentation
-- `php artisan lemme:install --force` - Reinstall and overwrite existing files
-- `php artisan lemme:clear` - Clear documentation cache
-- `php artisan lemme:reindex` - Rebuild page list, search index, and (if cache enabled) warm HTML caches
-- `php artisan lemme:reindex --clear` - Clear all caches first, then perform a full rebuild
+| Command | Purpose |
+|---------|---------|
+| `php artisan lemme:install` | Create docs directory + sample files; publish assets (forced) |
+| `php artisan lemme:install --force` | Overwrite existing sample files if present |
+| `php artisan lemme:clear` | Clear page, HTML and search caches |
+| `php artisan lemme:reindex` | Rebuild page list & search; warm HTML (when cache enabled) |
+| `php artisan lemme:reindex --clear` | Clear caches first, then rebuild and warm |
+| `php artisan lemme:publish` | (Provided by package) Publish assets/views/config (interactive) |
 
-Reindex is safe to run in deploy hooks or scheduled tasks when you add / change many docs at once.
+Reindex is deploy‑safe; schedule it if you bulk update docs.
+
+### Publishing Assets / Views / Config
+
+Publish only what you need:
+
+```
+php artisan vendor:publish --tag=lemme-config
+php artisan vendor:publish --tag=lemme-views
+php artisan vendor:publish --tag=lemme-assets
+```
+
+Force re‑publish (e.g. after updating the package):
+
+```
+php artisan lemme:publish --force
+```
 
 ### Cache & Reindex Details
 
 Caching (when `lemme.cache.enabled=true`):
 
-- Pages collection stored under a single key (`lemme.pages`).
-- Each rendered HTML page is cached with a key including its `modified_at` timestamp: `lemme.html.{slug}.{modified_at}`.
-- A lightweight pointer key (`lemme.html.current.{slug}`) tracks the active version and old versions are pruned on re-render.
-- Search data stored at `lemme.search_data` and (re)built alongside pages.
+- Pages collection stored once under `lemme.pages` when first loaded.
+- Each rendered HTML page cached under `lemme.html.{slug}.{modified_at}` (immutable snapshot).
+- Pointer key `lemme.html.current.{slug}` tracks the active snapshot; previous snapshot key is removed on rotation.
+- Search data cached under `lemme.search_data` (rebuilt with pages or on demand if missing).
 
-Running `lemme:reindex` (without `--clear`) keeps existing HTML entries that are still current; changed files get fresh keys, unused previous keys are discarded.
+Running `lemme:reindex` (without `--clear`) re-reads markdown and warms (builds) HTML only if caching is enabled. Unchanged HTML snapshots remain current; changed files receive new keys and prior snapshots are pruned.
 
 ### Heading Anchors
 
