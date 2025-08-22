@@ -18,7 +18,7 @@ class LemmeServiceProvider extends ServiceProvider
 
         // Bind the Lemme class to the container and provide an alias 'lemme'
         $this->app->singleton(\Sorane\Lemme\Lemme::class, function () {
-            return new Lemme();
+            return new Lemme;
         });
 
         // Backwards compatible alias so resolve('lemme') still works

@@ -9,7 +9,7 @@ $routePrefix = config('lemme.route_prefix');
 
 if ($subdomain && ! $routePrefix) {
     // Use subdomain routing
-    Route::domain($subdomain.'.'.parse_url(config('app.url'), PHP_URL_HOST))
+    Route::domain($subdomain.'.'.\Sorane\Lemme\Lemme::baseHost())
         ->middleware(['web'])
         ->group(function () {
             Route::get('/', [DocsController::class, 'show'])->name('lemme.home');

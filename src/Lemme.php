@@ -5,11 +5,38 @@ namespace Sorane\Lemme;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
 
 class Lemme
 {
+    /**
+     * Return base scheme from app configuration, with sensible fallback.
+     */
+    public static function baseScheme(): string
+    {
+        $scheme = (string) parse_url((string) config('app.url'), PHP_URL_SCHEME);
+        if (! $scheme) {
+            $fallback = (string) url('/');
+            $scheme = (string) parse_url($fallback, PHP_URL_SCHEME);
+        }
+        return $scheme ?: 'http';
+    }
+
+    /**
+     * Return base host from app configuration, with sensible fallback.
+     */
+    public static function baseHost(): string
+    {
+        $host = (string) parse_url((string) config('app.url'), PHP_URL_HOST);
+        if (! $host) {
+            $fallback = (string) url('/');
+            $host = (string) parse_url($fallback, PHP_URL_HOST);
+        }
+        return $host ?: 'localhost';
+    }
+
     /**
      * Get all documentation pages
      */
@@ -30,9 +57,28 @@ class Lemme
         $pages = collect(File::allFiles($docsPath))
             ->filter(fn ($file) => $file->getExtension() === 'md')
             ->map(fn ($file) => $this->parseMarkdownFile($file->getPathname()))
-            ->filter()
-            ->sortBy($this->getSortCallback())
-            ->values();
+            ->filter();
+
+        // Sorting with proper descending handling for string fields
+        $callback = $this->getSortCallback();
+        $descending = strtolower((string) config('lemme.navigation.sort_direction', 'asc')) === 'desc';
+        $pages = $pages->sortBy($callback, SORT_REGULAR, $descending)->values();
+
+        // Detect duplicate flat slugs and fail fast with guidance
+        $duplicates = $pages->groupBy('slug')->filter(fn ($g) => $g->count() > 1);
+        if ($duplicates->isNotEmpty()) {
+            $example = $duplicates->first();
+            $sl = $example->first()['slug'] ?? '';
+            $files = $example->pluck('relative_path')->all();
+            Log::error('Lemme: duplicate slug detected', [
+                'slug' => $sl,
+                'files' => $files,
+            ]);
+            throw new \RuntimeException(
+                'Duplicate documentation slug "'.$sl.'" generated for multiple files: '.implode(', ', $files).'. '
+                .'Keep flat slugs unique. Provide `slug:` in frontmatter to disambiguate, or rename files.'
+            );
+        }
 
         if (config('lemme.cache.enabled')) {
             Cache::put($cacheKey, $pages, config('lemme.cache.ttl', 3600));
@@ -64,6 +110,7 @@ class Lemme
         }
 
         $cacheKey = "lemme.html.{$slug}.".md5($page['modified_at']);
+        $pointerKey = "lemme.html.current.{$slug}";
 
         if (config('lemme.cache.enabled') && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
@@ -74,7 +121,13 @@ class Lemme
             ->toHtml($page['raw_content']);
 
         if (config('lemme.cache.enabled')) {
+            // Proactively clear the previously used key for this slug
+            $previousKey = Cache::get($pointerKey);
+            if ($previousKey && $previousKey !== $cacheKey) {
+                Cache::forget($previousKey);
+            }
             Cache::put($cacheKey, $html, config('lemme.cache.ttl', 3600));
+            Cache::put($pointerKey, $cacheKey, config('lemme.cache.ttl', 3600));
         }
 
         return $html;
@@ -112,6 +165,10 @@ class Lemme
                 'created_at' => File::lastModified($filepath), // Simplified for now
             ];
         } catch (\Exception $e) {
+            Log::error('Lemme: failed to parse markdown file', [
+                'file' => $filepath,
+                'error' => $e->getMessage(),
+            ]);
             return null;
         }
     }
@@ -155,20 +212,19 @@ class Lemme
     protected function getSortCallback(): callable
     {
         $sortBy = config('lemme.navigation.sort_by', 'filename');
-        $direction = config('lemme.navigation.sort_direction', 'asc');
 
         return match ($sortBy) {
-            'title' => fn ($page) => $direction === 'asc' ? $page['title'] : $page['title'] * -1,
-            'created_at' => fn ($page) => $direction === 'asc' ? $page['created_at'] : $page['created_at'] * -1,
-            'modified_at' => fn ($page) => $direction === 'asc' ? $page['modified_at'] : $page['modified_at'] * -1,
-            default => fn ($page) => $this->getSortableFilename($page['relative_path'], $direction),
+            'title' => fn ($page) => $page['title'],
+            'created_at' => fn ($page) => $page['created_at'],
+            'modified_at' => fn ($page) => $page['modified_at'],
+            default => fn ($page) => $this->getSortableFilename($page['relative_path']),
         };
     }
 
     /**
      * Get sortable filename considering number prefixes
      */
-    protected function getSortableFilename(string $path, string $direction): string
+    protected function getSortableFilename(string $path): string
     {
         $parts = explode('/', $path);
         $sortableParts = [];
@@ -185,9 +241,7 @@ class Lemme
             }
         }
 
-        $sortableString = implode('/', $sortableParts);
-
-        return $direction === 'asc' ? $sortableString : str_replace('/', chr(255), $sortableString);
+        return implode('/', $sortableParts);
     }
 
     /**
@@ -395,11 +449,13 @@ class Lemme
     {
         Cache::forget('lemme.pages');
 
-        // Clear all HTML cache entries
+        // Clear HTML cache entries and pointers for currently known pages
         $pages = $this->getPages();
         foreach ($pages as $page) {
             $cacheKey = "lemme.html.{$page['slug']}.".md5($page['modified_at']);
+            $pointerKey = "lemme.html.current.{$page['slug']}";
             Cache::forget($cacheKey);
+            Cache::forget($pointerKey);
         }
 
         // Clear search cache

@@ -46,10 +46,9 @@ class LemmeInstallCommand extends Command
         $routePrefix = config('lemme.route_prefix');
 
         if ($subdomain && ! $routePrefix) {
-            // Using subdomain routing
-            $appUrl = config('app.url');
-            $protocol = parse_url($appUrl, PHP_URL_SCHEME);
-            $host = parse_url($appUrl, PHP_URL_HOST);
+            // Using subdomain routing with consistent domain calculation
+            $protocol = \Sorane\Lemme\Lemme::baseScheme();
+            $host = \Sorane\Lemme\Lemme::baseHost();
             $lemmeDomain = $protocol.'://'.$subdomain.'.'.$host;
         } elseif ($routePrefix) {
             // Using route prefix (default)
