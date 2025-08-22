@@ -14,6 +14,7 @@ Lemme is a Laravel package that facilitates the creation of beautiful documentat
 
 ## Features
 
+- **Super easy setup**: Just run `php artisan lemme:install`, then write your docs in the `docs/` folder and your documentation site is ready!
 - 📝 **Markdown-based**: Write your documentation in simple Markdown files inside the `docs/` directory in your project
 - 🎨 **Beautiful UI**: Modern design (Tailwind CSS 4 + dark mode) out of the box
 - 📱 **Responsive**: Works on all devices
