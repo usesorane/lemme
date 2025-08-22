@@ -10,12 +10,11 @@
 Lemme is a Laravel package that facilitates the creation of beautiful documentation websites from Markdown files. It provides a simple way to turn your project's documentation into a fully-featured website with a modern, responsive design. All from within your Laravel application.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/usesorane/lemme.svg?style=flat-square)](https://packagist.org/packages/usesorane/lemme)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/usesorane/lemme/run-tests.yml?branch=main&label=tests&style=flat-square)](
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/usesorane/lemme/run-tests.yml?branch=main&label=tests&style=flat-square)]
 
 ## Features
 
-- 📝 **Markdown-based**: Write your documentation in simple Markdown files inside a `docs/` directory
-- 📂 **Automatic navigation**: Sidebar navigation generated from your folder structure
+- 📝 **Markdown-based**: Write your documentation in simple Markdown files inside the `docs/` directory in your project
 - 🎨 **Beautiful UI**: Modern design (Tailwind CSS 4 + dark mode) out of the box
 - 📱 **Responsive**: Works on all devices
 - ⚡ **Fast**: Built-in caching (pages, HTML, search) with rotation
