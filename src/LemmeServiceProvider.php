@@ -3,6 +3,7 @@
 namespace Sorane\Lemme;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Sorane\Lemme\Commands\LemmeClearCommand;
@@ -27,8 +28,13 @@ class LemmeServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (config('lemme.subdomain') && config('lemme.route_prefix')) {
+            Log::notice('Lemme: both subdomain and route_prefix configured; route_prefix will take precedence.');
+        }
         // Load routes (only when not cached)
-        if (! $this->app->routesAreCached()) {
+    $router = $this->app['router'];
+    $routesCached = method_exists($router, 'routesAreCached') ? $router->routesAreCached() : false;
+    if (! $routesCached) {
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         }
 
@@ -44,7 +50,7 @@ class LemmeServiceProvider extends ServiceProvider
         }
 
         // Console-specific booting
-        if ($this->app->runningInConsole()) {
+    if ($this->app->runningInConsole()) {
             // Publishing config
             $this->publishes([
                 __DIR__.'/../config/lemme.php' => config_path('lemme.php'),
@@ -55,10 +61,12 @@ class LemmeServiceProvider extends ServiceProvider
                 __DIR__.'/../resources/views' => resource_path('views/vendor/lemme'),
             ], 'lemme-views');
 
-            // Publishing compiled assets (CSS/JS)
-            $this->publishes([
-                __DIR__.'/../resources/dist' => public_path('vendor/lemme'),
-            ], 'lemme-assets');
+            // Publishing compiled assets (CSS/JS) only if build directory exists
+            if (is_dir(__DIR__.'/../resources/dist')) {
+                $this->publishes([
+                    __DIR__.'/../resources/dist' => public_path('vendor/lemme'),
+                ], 'lemme-assets');
+            }
 
             // Register artisan commands
             $this->commands([

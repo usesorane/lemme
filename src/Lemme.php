@@ -68,7 +68,7 @@ class Lemme
             return collect();
         }
 
-        $pages = collect(File::allFiles($docsPath))
+    $pages = collect(File::allFiles($docsPath))
             ->filter(fn ($file) => $file->getExtension() === 'md')
             ->map(fn ($file) => $this->parseMarkdownFile($file->getPathname()))
             ->filter();
@@ -155,7 +155,7 @@ class Lemme
      */
     protected function parseMarkdownFile(string $filepath): ?\Sorane\Lemme\Data\PageData
     {
-        try {
+    try {
             $content = File::get($filepath);
             $document = YamlFrontMatter::parse($content);
 
@@ -184,7 +184,7 @@ class Lemme
                 'file' => $filepath,
                 'error' => $e->getMessage(),
             ]);
-
+            event(new \Sorane\Lemme\Events\MarkdownParseFailed($filepath, $e->getMessage()));
             return null;
         }
     }
@@ -246,18 +246,20 @@ class Lemme
         $sortableParts = [];
 
         foreach ($parts as $part) {
-            // Extract number prefix for proper numeric sorting
-            if (preg_match('/^(\d+)[-_](.+)/', $part, $matches)) {
-                $number = str_pad($matches[1], 5, '0', STR_PAD_LEFT); // Pad for proper sorting
-                $name = $matches[2];
-                $sortableParts[] = $number.'_'.$name;
-            } else {
-                // No number prefix, add high number to sort after numbered items
-                $sortableParts[] = '99999_'.$part;
-            }
+            $sortableParts[] = $this->prefixSortableName($part);
         }
 
         return implode('/', $sortableParts);
+    }
+
+    protected function prefixSortableName(string $name): string
+    {
+        if (preg_match('/^(\d+)[-_](.+)/', $name, $matches)) {
+            $number = str_pad($matches[1], 5, '0', STR_PAD_LEFT);
+            $clean = $matches[2];
+            return $number.'_'.$clean;
+        }
+        return '99999_'.$name;
     }
 
     /**
@@ -430,16 +432,7 @@ class Lemme
      */
     protected function getSortableDirectoryName(string $dirName): string
     {
-        // Extract number prefix for proper numeric sorting
-        if (preg_match('/^(\d+)[-_](.+)/', $dirName, $matches)) {
-            $number = str_pad($matches[1], 5, '0', STR_PAD_LEFT); // Pad for proper sorting
-            $name = $matches[2];
-
-            return $number.'_'.$name;
-        }
-
-        // No number prefix, add high number to sort after numbered items
-        return '99999_'.$dirName;
+        return $this->prefixSortableName($dirName);
     }
 
     /**
@@ -554,15 +547,41 @@ class Lemme
      */
     protected function injectHeadingIdsIntoHtml(string $html): string
     {
-        return (string) preg_replace_callback('/<h([1-6])(?![^>]*id=)([^>]*)>(.*?)<\/h\\1>/i', function ($matches) {
-            $level = $matches[1];
-            $attrs = $matches[2];
-            $inner = $matches[3];
-            $plain = strip_tags($inner);
-            $id = $this->generateHeadingId($plain);
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        libxml_use_internal_errors(true);
+        // Wrap in a container to ensure proper loadHTML handling
+        $dom->loadHTML('<div id="__lemme_root__">'.$html.'</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
 
-            return "<h{$level}{$attrs} id=\"{$id}\">{$inner}</h{$level}>";
-        }, $html);
+        $counts = [];
+        foreach (['h1','h2','h3','h4','h5','h6'] as $tag) {
+            $nodes = $dom->getElementsByTagName($tag);
+            // Because live NodeList updates dynamically, iterate by index snapshot
+            for ($i = 0; $i < $nodes->length; $i++) {
+                $node = $nodes->item($i);
+                if (! $node instanceof \DOMElement) {
+                    continue;
+                }
+                $text = trim($node->textContent ?? '');
+                if ($text === '') {
+                    continue;
+                }
+                $base = $this->generateHeadingId($text);
+                $counts[$base] = ($counts[$base] ?? 0) + 1;
+                $id = $counts[$base] > 1 ? $base.'-'.$counts[$base] : $base;
+                $node->setAttribute('id', $id);
+            }
+        }
+
+        // Extract inner HTML of wrapper
+        $wrapper = $dom->getElementById('__lemme_root__');
+        $result = '';
+        if ($wrapper) {
+            foreach ($wrapper->childNodes as $child) {
+                $result .= $dom->saveHTML($child);
+            }
+        }
+        return $result ?: $html;
     }
 
     /**

@@ -32,7 +32,7 @@ class SearchComponent extends Component
     public function updatedSearch(): void
     {
         if (empty(trim($this->search))) {
-            $this->results = [];
+            $this->reset('results');
 
             return;
         }
