@@ -14,7 +14,8 @@ Lemme is a Laravel package that facilitates the creation of beautiful documentat
 
 ## Features
 
-- 📝 **Markdown-based**: Write your documentation in simple Markdown files
+- 📝 **Markdown-based**: Write your documentation in simple Markdown files inside a `docs/` directory
+- 📂 **Automatic navigation**: Sidebar navigation generated from your folder structure
 - 🎨 **Beautiful UI**: Modern design (Tailwind CSS 4 + dark mode) out of the box
 - 📱 **Responsive**: Works on all devices
 - ⚡ **Fast**: Built-in caching (pages, HTML, search) with rotation
