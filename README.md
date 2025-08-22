@@ -317,6 +317,40 @@ slug: setup
 ```
 Result: `/setup` instead of `/installation`
 
+##### Index Pages & Nested Index Behavior
+
+Special handling applies to `index.md` files:
+
+- Root `docs/index.md` becomes the "home" page and gets an empty slug (served at the docs root).
+- A nested `index.md` (e.g. `docs/guide/index.md`) adopts the **directory name** (`guide`) as its slug instead of `index`.
+- Number prefixes on the directory (e.g. `1_guide/index.md`) are stripped before generating the slug: `1_guide/index.md` -> `guide`.
+- Regular files still derive their slug from their own filename only (directories are never prefixed onto slugs except for the nested index rule above).
+
+This keeps URLs short and predictable: `docs/guide/index.md` -> `/guide`, `docs/guide/intro.md` -> `/intro`.
+
+##### Duplicate Slug Handling
+
+If two files would produce the same slug (e.g. `docs/one/foo.md` and `docs/two/foo.md`) Lemme throws a runtime exception during page collection. Fix by either:
+
+1. Adding a unique `slug:` value in one file's frontmatter, or
+2. Renaming one of the files.
+
+Fail‑fast detection prevents silently colliding pages and unexpected content swaps.
+
+##### Quick Reference Summary
+
+| Case | Example Path | Generated Slug |
+|------|--------------|----------------|
+| Root index | `docs/index.md` | `` (empty/home) |
+| Nested index | `docs/guide/index.md` | `guide` |
+| Numbered nested index | `docs/1_guide/index.md` | `guide` |
+| Regular file | `docs/guide/intro.md` | `intro` |
+| CamelCase filename | `docs/CamelCaseFile.md` | `camel-case-file` |
+| With frontmatter slug | `slug: custom` | `custom` |
+| Collision (two foo.md) | `one/foo.md`, `two/foo.md` | Error (must resolve) |
+
+---
+
 3. **Organize in folders** for better structure:
 
 ```
@@ -389,6 +423,46 @@ Lemme provides JSON API endpoints for headless usage:
 - `php artisan lemme:install` - Install and set up documentation
 - `php artisan lemme:install --force` - Reinstall and overwrite existing files
 - `php artisan lemme:clear` - Clear documentation cache
+- `php artisan lemme:reindex` - Rebuild page list, search index, and (if cache enabled) warm HTML caches
+- `php artisan lemme:reindex --clear` - Clear all caches first, then perform a full rebuild
+
+Reindex is safe to run in deploy hooks or scheduled tasks when you add / change many docs at once.
+
+### Cache & Reindex Details
+
+Caching (when `lemme.cache.enabled=true`):
+
+- Pages collection stored under a single key (`lemme.pages`).
+- Each rendered HTML page is cached with a key including its `modified_at` timestamp: `lemme.html.{slug}.{modified_at}`.
+- A lightweight pointer key (`lemme.html.current.{slug}`) tracks the active version and old versions are pruned on re-render.
+- Search data stored at `lemme.search_data` and (re)built alongside pages.
+
+Running `lemme:reindex` (without `--clear`) keeps existing HTML entries that are still current; changed files get fresh keys, unused previous keys are discarded.
+
+### Heading Anchors
+
+All Markdown headings (`#` .. `######`) are assigned stable, URL‑friendly IDs after HTML rendering. Duplicate headings on the same page receive numeric suffixes (`overview`, `overview-2`, `overview-3`, ...). This enables reliable deep‑linking and on‑page navigation.
+
+### Search Index
+
+The search index stores:
+
+- `title`
+- `category` (top‑level directory or `General`)
+- `url`
+- `content` (plain‑text extraction of rendered Markdown)
+
+You can optionally truncate indexed content via `lemme.search.max_content_length` (0 = unlimited). Example in `.env`:
+
+```
+LEMME_SEARCH_MAX_CONTENT_LENGTH=8000
+```
+
+### Troubleshooting Slugs
+
+- Unexpected empty slug? Likely the root `index.md`.
+- Got an exception about a duplicate slug? Provide a custom frontmatter slug or rename the file.
+- Want to keep nested `index.md` as `index`? Add `slug: index` to its frontmatter (be sure it won’t collide with another page).
 
 ### Using the Facade
 

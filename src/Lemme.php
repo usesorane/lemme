@@ -195,19 +195,27 @@ class Lemme
      */
     protected function generateSlugFromFilename(string $path): string
     {
-        // Get just the filename without extension
         $filename = pathinfo($path, PATHINFO_FILENAME);
+        $directory = trim(str_replace(basename($path), '', $path), '/');
 
-        // Remove number prefix (e.g., "1_", "2-", "10_")
         $cleaned = $this->removeNumberPrefix($filename);
 
-        // Pre-process camelCase to add spaces before capital letters
         $cleaned = preg_replace('/([a-z])([A-Z])/', '$1 $2', $cleaned);
 
-        // Use Laravel's Str::slug() to generate a proper slug
         $slug = Str::slug($cleaned, '-');
+        if ($slug === 'index') {
+            if ($directory === '') {
+                return '';
+            }
+            // Use last directory as slug (respect numeric prefixes there too)
+            $segments = explode('/', $directory);
+            $last = end($segments);
+            $last = $this->removeNumberPrefix($last);
 
-        return $slug === 'index' ? '' : $slug;
+            return Str::slug($last, '-');
+        }
+
+        return $slug;
     }
 
     /**

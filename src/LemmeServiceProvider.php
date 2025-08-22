@@ -9,6 +9,7 @@ use Livewire\Livewire;
 use Sorane\Lemme\Commands\LemmeClearCommand;
 use Sorane\Lemme\Commands\LemmeInstallCommand;
 use Sorane\Lemme\Commands\LemmePublishCommand;
+use Sorane\Lemme\Commands\LemmeReindexCommand;
 
 class LemmeServiceProvider extends ServiceProvider
 {
@@ -73,6 +74,7 @@ class LemmeServiceProvider extends ServiceProvider
                 LemmeInstallCommand::class,
                 LemmeClearCommand::class,
                 LemmePublishCommand::class,
+                LemmeReindexCommand::class,
             ]);
         }
     }
