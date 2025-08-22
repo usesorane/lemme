@@ -68,7 +68,7 @@ class Lemme
             return collect();
         }
 
-    $pages = collect(File::allFiles($docsPath))
+        $pages = collect(File::allFiles($docsPath))
             ->filter(fn ($file) => $file->getExtension() === 'md')
             ->map(fn ($file) => $this->parseMarkdownFile($file->getPathname()))
             ->filter();
@@ -155,7 +155,7 @@ class Lemme
      */
     protected function parseMarkdownFile(string $filepath): ?\Sorane\Lemme\Data\PageData
     {
-    try {
+        try {
             $content = File::get($filepath);
             $document = YamlFrontMatter::parse($content);
 
@@ -185,6 +185,7 @@ class Lemme
                 'error' => $e->getMessage(),
             ]);
             event(new \Sorane\Lemme\Events\MarkdownParseFailed($filepath, $e->getMessage()));
+
             return null;
         }
     }
@@ -257,8 +258,10 @@ class Lemme
         if (preg_match('/^(\d+)[-_](.+)/', $name, $matches)) {
             $number = str_pad($matches[1], 5, '0', STR_PAD_LEFT);
             $clean = $matches[2];
+
             return $number.'_'.$clean;
         }
+
         return '99999_'.$name;
     }
 
@@ -554,7 +557,7 @@ class Lemme
         libxml_clear_errors();
 
         $counts = [];
-        foreach (['h1','h2','h3','h4','h5','h6'] as $tag) {
+        foreach (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as $tag) {
             $nodes = $dom->getElementsByTagName($tag);
             // Because live NodeList updates dynamically, iterate by index snapshot
             for ($i = 0; $i < $nodes->length; $i++) {
@@ -581,6 +584,7 @@ class Lemme
                 $result .= $dom->saveHTML($child);
             }
         }
+
         return $result ?: $html;
     }
 

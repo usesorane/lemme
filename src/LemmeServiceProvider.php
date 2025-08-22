@@ -32,9 +32,9 @@ class LemmeServiceProvider extends ServiceProvider
             Log::notice('Lemme: both subdomain and route_prefix configured; route_prefix will take precedence.');
         }
         // Load routes (only when not cached)
-    $router = $this->app['router'];
-    $routesCached = method_exists($router, 'routesAreCached') ? $router->routesAreCached() : false;
-    if (! $routesCached) {
+        $router = $this->app['router'];
+        $routesCached = method_exists($router, 'routesAreCached') ? $router->routesAreCached() : false;
+        if (! $routesCached) {
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         }
 
@@ -50,7 +50,7 @@ class LemmeServiceProvider extends ServiceProvider
         }
 
         // Console-specific booting
-    if ($this->app->runningInConsole()) {
+        if ($this->app->runningInConsole()) {
             // Publishing config
             $this->publishes([
                 __DIR__.'/../config/lemme.php' => config_path('lemme.php'),
