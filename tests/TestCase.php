@@ -26,6 +26,7 @@ class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app): array
     {
         return [
+            \Livewire\LivewireServiceProvider::class,
             \Sorane\Lemme\LemmeServiceProvider::class,
         ];
     }

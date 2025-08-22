@@ -1,84 +1,56 @@
 <?php
 
-namespace Sorane\Lemme\Tests;
-
 use Livewire\Livewire;
-use Sorane\Lemme\Facades\Lemme;
 use Sorane\Lemme\Livewire\SearchComponent;
 
-class SearchComponentTest extends TestCase
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function () {
+    // Encryption key required by Livewire components
+    config()->set('app.key', 'base64:'.base64_encode('a'.str_repeat('b', 31)));
+});
 
-        // Set up encryption key for testing
-        $this->app['config']->set('app.key', 'base64:'.base64_encode('a'.str_repeat('b', 31)));
-    }
+it('can render search component', function () {
+    Livewire::test(SearchComponent::class)
+        ->assertStatus(200)
+        ->assertViewIs('lemme::livewire.search-component');
+});
 
-    protected function getPackageAliases($app)
-    {
-        return [
-            'Lemme' => Lemme::class,
-        ];
-    }
+it('initializes with empty search and results', function () {
+    Livewire::test(SearchComponent::class)
+        ->assertSet('search', '')
+        ->assertSet('results', []);
+});
 
-    /** @test */
-    public function it_can_render_search_component()
-    {
-        Livewire::test(SearchComponent::class)
-            ->assertStatus(200)
-            ->assertViewIs('lemme::livewire.search-component');
-    }
+it('can initialize search data', function () {
+    Livewire::test(SearchComponent::class)
+        ->call('initSearchData')
+        ->assertDispatched('search-data-ready');
+});
 
-    /** @test */
-    public function it_initializes_with_empty_search_and_results()
-    {
-        Livewire::test(SearchComponent::class)
-            ->assertSet('search', '')
-            ->assertSet('results', []);
-    }
+it('dispatches search event when search updates', function () {
+    Livewire::test(SearchComponent::class)
+        ->set('search', 'installation')
+        ->assertDispatched('perform-search', query: 'installation');
+});
 
-    /** @test */
-    public function it_can_initialize_search_data()
-    {
-        Livewire::test(SearchComponent::class)
-            ->call('initSearchData')
-            ->assertDispatched('search-data-ready');
-    }
+it('handles search results', function () {
+    $mockResults = [
+        [
+            'title' => 'Installation Guide',
+            'category' => 'Guides',
+            'url' => '/docs/installation',
+            'content' => 'How to install the system',
+            'score' => 0.1,
+        ],
+    ];
 
-    /** @test */
-    public function it_dispatches_search_event_when_search_updates()
-    {
-        Livewire::test(SearchComponent::class)
-            ->set('search', 'installation')
-            ->assertDispatched('perform-search', query: 'installation');
-    }
+    Livewire::test(SearchComponent::class)
+        ->call('handleSearchResults', $mockResults)
+        ->assertSet('results', $mockResults);
+});
 
-    /** @test */
-    public function it_handles_search_results()
-    {
-        $mockResults = [
-            [
-                'title' => 'Installation Guide',
-                'category' => 'Guides',
-                'url' => '/docs/installation',
-                'content' => 'How to install the system',
-                'score' => 0.1,
-            ],
-        ];
-
-        Livewire::test(SearchComponent::class)
-            ->call('handleSearchResults', $mockResults)
-            ->assertSet('results', $mockResults);
-    }
-
-    /** @test */
-    public function it_clears_results_when_search_is_empty()
-    {
-        Livewire::test(SearchComponent::class)
-            ->set('search', 'test')
-            ->set('search', '')
-            ->assertSet('results', []);
-    }
-}
+it('clears results when search is empty', function () {
+    Livewire::test(SearchComponent::class)
+        ->set('search', 'test')
+        ->set('search', '')
+        ->assertSet('results', []);
+});

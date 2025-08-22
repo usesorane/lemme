@@ -1,121 +1,72 @@
 <?php
 
-namespace Sorane\Lemme\Tests;
+use Sorane\Lemme\Lemme;
 
-class NavigationGroupingTest extends TestCase
-{
-    protected $lemme;
+// Keeping reflection-based tests for now; integration navigation test added separately.
 
-    protected function setUp(): void
-    {
-        $this->lemme = new Lemme;
-    }
+beforeEach(function () {
+    $this->lemme = new Lemme;
+});
 
-    public function test_group_pages_by_directory()
-    {
-        // Mock pages data
-        $pages = collect([
-            [
-                'title' => 'Home',
-                'slug' => '',
-                'relative_path' => 'index.md',
-            ],
-            [
-                'title' => 'Installation',
-                'slug' => 'getting-started-installation',
-                'relative_path' => 'getting-started/installation.md',
-            ],
-            [
-                'title' => 'Configuration',
-                'slug' => 'getting-started-configuration',
-                'relative_path' => 'getting-started/configuration.md',
-            ],
-            [
-                'title' => 'Authentication',
-                'slug' => 'api-authentication',
-                'relative_path' => 'api/authentication.md',
-            ],
-            [
-                'title' => 'Webhooks',
-                'slug' => 'api-advanced-webhooks',
-                'relative_path' => 'api/advanced/webhooks.md',
-            ],
-        ]);
+it('groups pages by directory', function () {
+    $pages = collect([
+        ['title' => 'Home', 'slug' => '', 'relative_path' => 'index.md'],
+        ['title' => 'Installation', 'slug' => 'getting-started-installation', 'relative_path' => 'getting-started/installation.md'],
+        ['title' => 'Configuration', 'slug' => 'getting-started-configuration', 'relative_path' => 'getting-started/configuration.md'],
+        ['title' => 'Authentication', 'slug' => 'api-authentication', 'relative_path' => 'api/authentication.md'],
+        ['title' => 'Webhooks', 'slug' => 'api-advanced-webhooks', 'relative_path' => 'api/advanced/webhooks.md'],
+    ]);
 
-        // Use reflection to access protected method
-        $reflection = new ReflectionClass($this->lemme);
-        $method = $reflection->getMethod('groupPagesByDirectory');
-        $method->setAccessible(true);
+    $reflection = new ReflectionClass($this->lemme);
+    $method = $reflection->getMethod('groupPagesByDirectory');
+    $method->setAccessible(true);
+    $result = $method->invoke($this->lemme, $pages);
 
-        $result = $method->invoke($this->lemme, $pages);
+    expect($result)->toHaveKeys(['_root', 'getting-started', 'api'])
+        ->and($result['_root'])->toHaveCount(1)
+        ->and($result['_root'][0]['title'])->toBe('Home')
+        ->and($result['getting-started'])->toHaveKey('_pages')
+        ->and($result['getting-started']['_pages'])->toHaveCount(2)
+        ->and($result['api'])->toHaveKey('advanced')
+        ->and($result['api']['advanced'])->toHaveKey('_pages')
+        ->and($result['api']['advanced']['_pages'])->toHaveCount(1)
+        ->and($result['api']['advanced']['_pages'][0]['title'])->toBe('Webhooks');
+});
 
-        // Assert structure
-        $this->assertArrayHasKey('_root', $result);
-        $this->assertArrayHasKey('getting-started', $result);
-        $this->assertArrayHasKey('api', $result);
+it('formats group title', function () {
+    $reflection = new ReflectionClass($this->lemme);
+    $method = $reflection->getMethod('formatGroupTitle');
+    $method->setAccessible(true);
 
-        // Assert root pages
-        $this->assertCount(1, $result['_root']);
-        $this->assertEquals('Home', $result['_root'][0]['title']);
+    expect($method->invoke($this->lemme, 'getting-started'))->toBe('Getting Started')
+        ->and($method->invoke($this->lemme, 'api_reference'))->toBe('Api Reference')
+        ->and($method->invoke($this->lemme, 'user-management'))->toBe('User Management')
+        ->and($method->invoke($this->lemme, '1_getting-started'))->toBe('Getting Started')
+        ->and($method->invoke($this->lemme, '01-api_reference'))->toBe('Api Reference')
+        ->and($method->invoke($this->lemme, '10_advanced-topics'))->toBe('Advanced Topics');
+});
 
-        // Assert getting-started group
-        $this->assertArrayHasKey('_pages', $result['getting-started']);
-        $this->assertCount(2, $result['getting-started']['_pages']);
+it('removes number prefix', function () {
+    $reflection = new ReflectionClass($this->lemme);
+    $method = $reflection->getMethod('removeNumberPrefix');
+    $method->setAccessible(true);
 
-        // Assert nested api/advanced structure
-        $this->assertArrayHasKey('advanced', $result['api']);
-        $this->assertArrayHasKey('_pages', $result['api']['advanced']);
-        $this->assertCount(1, $result['api']['advanced']['_pages']);
-        $this->assertEquals('Webhooks', $result['api']['advanced']['_pages'][0]['title']);
-    }
+    expect($method->invoke($this->lemme, '1_installation.md'))->toBe('installation.md')
+        ->and($method->invoke($this->lemme, '01-configuration.md'))->toBe('configuration.md')
+        ->and($method->invoke($this->lemme, '10_advanced-topics'))->toBe('advanced-topics')
+        ->and($method->invoke($this->lemme, '100-webhooks'))->toBe('webhooks')
+        ->and($method->invoke($this->lemme, 'installation.md'))->toBe('installation.md')
+        ->and($method->invoke($this->lemme, 'getting-started'))->toBe('getting-started');
+});
 
-    public function test_format_group_title()
-    {
-        $reflection = new ReflectionClass($this->lemme);
-        $method = $reflection->getMethod('formatGroupTitle');
-        $method->setAccessible(true);
+it('gets sortable directory name', function () {
+    $reflection = new ReflectionClass($this->lemme);
+    $method = $reflection->getMethod('getSortableDirectoryName');
+    $method->setAccessible(true);
 
-        // Test regular formatting
-        $this->assertEquals('Getting Started', $method->invoke($this->lemme, 'getting-started'));
-        $this->assertEquals('Api Reference', $method->invoke($this->lemme, 'api_reference'));
-        $this->assertEquals('User Management', $method->invoke($this->lemme, 'user-management'));
-
-        // Test number prefix removal
-        $this->assertEquals('Getting Started', $method->invoke($this->lemme, '1_getting-started'));
-        $this->assertEquals('Api Reference', $method->invoke($this->lemme, '01-api_reference'));
-        $this->assertEquals('Advanced Topics', $method->invoke($this->lemme, '10_advanced-topics'));
-    }
-
-    public function test_remove_number_prefix()
-    {
-        $reflection = new ReflectionClass($this->lemme);
-        $method = $reflection->getMethod('removeNumberPrefix');
-        $method->setAccessible(true);
-
-        // Test various number prefix patterns
-        $this->assertEquals('installation.md', $method->invoke($this->lemme, '1_installation.md'));
-        $this->assertEquals('configuration.md', $method->invoke($this->lemme, '01-configuration.md'));
-        $this->assertEquals('advanced-topics', $method->invoke($this->lemme, '10_advanced-topics'));
-        $this->assertEquals('webhooks', $method->invoke($this->lemme, '100-webhooks'));
-
-        // Test without number prefix (should remain unchanged)
-        $this->assertEquals('installation.md', $method->invoke($this->lemme, 'installation.md'));
-        $this->assertEquals('getting-started', $method->invoke($this->lemme, 'getting-started'));
-    }
-
-    public function test_sortable_directory_name()
-    {
-        $reflection = new ReflectionClass($this->lemme);
-        $method = $reflection->getMethod('getSortableDirectoryName');
-        $method->setAccessible(true);
-
-        // Test numeric sorting
-        $this->assertEquals('00001_getting-started', $method->invoke($this->lemme, '1_getting-started'));
-        $this->assertEquals('00010_advanced', $method->invoke($this->lemme, '10_advanced'));
-        $this->assertEquals('00001_api', $method->invoke($this->lemme, '1-api'));
-
-        // Test non-numbered items (should sort last)
-        $this->assertEquals('99999_misc', $method->invoke($this->lemme, 'misc'));
-        $this->assertEquals('99999_guides', $method->invoke($this->lemme, 'guides'));
-    }
-}
+    expect($method->invoke($this->lemme, '1_getting-started'))->toBe('00001_getting-started')
+        ->and($method->invoke($this->lemme, '10_advanced'))->toBe('00010_advanced')
+        ->and($method->invoke($this->lemme, '1-api'))->toBe('00001_api')
+        ->and($method->invoke($this->lemme, 'misc'))->toBe('99999_misc')
+        ->and($method->invoke($this->lemme, 'guides'))->toBe('99999_guides');
+});
