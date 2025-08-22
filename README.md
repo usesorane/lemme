@@ -1,4 +1,11 @@
-# Lemme - Laravel Documentation Generator
+<p align="center">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="art/lemme-art.svg">
+        <img src="art/lemme-art.svg" alt="Lemme Art" width="480" />
+    </picture>
+</p>
+
+# Lemme - Documentation Generator for Laravel
 
 Lemme is a Laravel package that facilitates the creation of beautiful documentation websites from Markdown files. It provides a simple way to turn your project's documentation into a fully-featured website with a modern, responsive design.
 
