@@ -33,11 +33,11 @@ This is a test page with some content.
 MD);
 
     $pages = Lemme::getPages();
-
     expect($pages)->toHaveCount(1)
         ->and($pages->first()['title'])->toBe('Test Page')
-        ->and($pages->first()['slug'])->toBe('test')
-        ->and($pages->first()['raw_content'])->toContain('<h1 id="test-content">Test Content</h1>');
+        ->and($pages->first()['slug'])->toBe('test');
+    $html = Lemme::getPageHtml('test');
+    expect($html)->toContain('<h1 id="test-content">Test Content');
 });
 
 it('can get specific page', function () {

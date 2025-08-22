@@ -67,7 +67,7 @@
             </button>
 
             <!-- Logo -->
-            <a class="flex-shrink-0" aria-label="Home" href="/">
+            <a class="flex-shrink-0" aria-label="Home" href="{{ route('lemme.home') }}">
                 @php($logo = config('lemme.logo'))
                 @switch($logo['type'] ?? 'view')
                     @case('image')

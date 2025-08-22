@@ -21,6 +21,8 @@ class TestCase extends OrchestraTestCase
         ]);
 
         $app['config']->set('cache.default', 'array');
+        // Provide encryption key for tests (Livewire, encryption services)
+        $app['config']->set('app.key', 'base64:'.base64_encode('a'.str_repeat('b', 31)));
     }
 
     protected function getPackageProviders($app): array

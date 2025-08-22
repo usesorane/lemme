@@ -13,12 +13,12 @@ if ($subdomain && ! $routePrefix) {
         ->middleware(['web'])
         ->group(function () {
             Route::get('/', [DocsController::class, 'show'])->name('lemme.home');
-            Route::get('/{slug}', [DocsController::class, 'show'])->name('lemme.page')->where('slug', '.*');
+            Route::get('/{slug}', [DocsController::class, 'show'])->name('lemme.page')->where('slug', '(?!api(?:/|$))[a-z0-9][a-z0-9\-/]*');
 
             // API routes
             Route::prefix('api')->group(function () {
                 Route::get('/', [DocsController::class, 'api'])->name('lemme.api');
-                Route::get('/{slug}', [DocsController::class, 'apiPage'])->name('lemme.api.page')->where('slug', '.*');
+                Route::get('/{slug}', [DocsController::class, 'apiPage'])->name('lemme.api.page')->where('slug', '[a-z0-9][a-z0-9\-/]*');
             });
         });
 } elseif ($routePrefix) {
@@ -27,12 +27,12 @@ if ($subdomain && ! $routePrefix) {
         ->middleware(['web'])
         ->group(function () {
             Route::get('/', [DocsController::class, 'show'])->name('lemme.home');
-            Route::get('/{slug}', [DocsController::class, 'show'])->name('lemme.page')->where('slug', '.*');
+            Route::get('/{slug}', [DocsController::class, 'show'])->name('lemme.page')->where('slug', '(?!api(?:/|$))[a-z0-9][a-z0-9\-/]*');
 
             // API routes
             Route::prefix('api')->group(function () {
                 Route::get('/', [DocsController::class, 'api'])->name('lemme.api');
-                Route::get('/{slug}', [DocsController::class, 'apiPage'])->name('lemme.api.page')->where('slug', '.*');
+                Route::get('/{slug}', [DocsController::class, 'apiPage'])->name('lemme.api.page')->where('slug', '[a-z0-9][a-z0-9\-/]*');
             });
         });
 } else {
@@ -41,12 +41,12 @@ if ($subdomain && ! $routePrefix) {
         ->middleware(['web'])
         ->group(function () {
             Route::get('/', [DocsController::class, 'show'])->name('lemme.home');
-            Route::get('/{slug}', [DocsController::class, 'show'])->name('lemme.page')->where('slug', '.*');
+            Route::get('/{slug}', [DocsController::class, 'show'])->name('lemme.page')->where('slug', '(?!api(?:/|$))[a-z0-9][a-z0-9\-/]*');
 
             // API routes
             Route::prefix('api')->group(function () {
                 Route::get('/', [DocsController::class, 'api'])->name('lemme.api');
-                Route::get('/{slug}', [DocsController::class, 'apiPage'])->name('lemme.api.page')->where('slug', '.*');
+                Route::get('/{slug}', [DocsController::class, 'apiPage'])->name('lemme.api.page')->where('slug', '[a-z0-9][a-z0-9\-/]*');
             });
         });
 }

@@ -21,6 +21,7 @@ class Lemme
             $fallback = (string) url('/');
             $scheme = (string) parse_url($fallback, PHP_URL_SCHEME);
         }
+
         return $scheme ?: 'http';
     }
 
@@ -34,11 +35,17 @@ class Lemme
             $fallback = (string) url('/');
             $host = (string) parse_url($fallback, PHP_URL_HOST);
         }
+
         return $host ?: 'localhost';
     }
 
     /**
      * Get all documentation pages
+     */
+    /**
+     * Get all documentation pages.
+     *
+     * @return Collection<int, \Sorane\Lemme\Data\PageData>
      */
     public function getPages(): Collection
     {
@@ -49,6 +56,13 @@ class Lemme
         }
 
         $docsPath = base_path(config('lemme.docs_directory', 'docs'));
+        $realDocsPath = realpath($docsPath);
+        $basePath = realpath(base_path());
+
+        if (! $realDocsPath || ! $basePath || ! str_starts_with($realDocsPath, $basePath)) {
+            // Security: prevent traversing outside project root
+            return collect();
+        }
 
         if (! File::exists($docsPath)) {
             return collect();
@@ -93,7 +107,7 @@ class Lemme
     /**
      * Get a specific page by slug
      */
-    public function getPage(string $slug): ?array
+    public function getPage(string $slug): ?\Sorane\Lemme\Data\PageData
     {
         return $this->getPages()->first(fn ($page) => $page['slug'] === $slug);
     }
@@ -109,7 +123,7 @@ class Lemme
             return null;
         }
 
-        $cacheKey = "lemme.html.{$slug}.".md5($page['modified_at']);
+        $cacheKey = "lemme.html.{$slug}.{$page['modified_at']}";
         $pointerKey = "lemme.html.current.{$slug}";
 
         if (config('lemme.cache.enabled') && Cache::has($cacheKey)) {
@@ -119,6 +133,9 @@ class Lemme
         $html = app(\Spatie\LaravelMarkdown\MarkdownRenderer::class)
             ->highlightTheme(['light' => 'github-light', 'dark' => 'github-dark'])
             ->toHtml($page['raw_content']);
+
+        // Inject heading IDs after render (safer than mutating markdown pre-render)
+        $html = $this->injectHeadingIdsIntoHtml($html);
 
         if (config('lemme.cache.enabled')) {
             // Proactively clear the previously used key for this slug
@@ -136,7 +153,7 @@ class Lemme
     /**
      * Parse a markdown file and extract frontmatter and content
      */
-    protected function parseMarkdownFile(string $filepath): ?array
+    protected function parseMarkdownFile(string $filepath): ?\Sorane\Lemme\Data\PageData
     {
         try {
             $content = File::get($filepath);
@@ -151,24 +168,23 @@ class Lemme
             $headings = $this->extractHeadings($markdownContent);
 
             // Inject IDs into the markdown content for the headings
-            $markdownWithIds = $this->injectHeadingIds($markdownContent, $headings);
-
-            return [
-                'title' => $document->matter('title') ?? $this->generateTitleFromPath($relativePath),
-                'slug' => $slug,
-                'raw_content' => $markdownWithIds,
-                'headings' => $headings,
-                'frontmatter' => $document->matter(),
-                'filepath' => $filepath,
-                'relative_path' => $relativePath,
-                'modified_at' => File::lastModified($filepath),
-                'created_at' => File::lastModified($filepath), // Simplified for now
-            ];
+            return new \Sorane\Lemme\Data\PageData(
+                title: $document->matter('title') ?? $this->generateTitleFromPath($relativePath),
+                slug: $slug,
+                raw_content: $markdownContent,
+                headings: $headings,
+                frontmatter: $document->matter(),
+                filepath: $filepath,
+                relative_path: $relativePath,
+                modified_at: File::lastModified($filepath),
+                created_at: File::lastModified($filepath),
+            );
         } catch (\Exception $e) {
             Log::error('Lemme: failed to parse markdown file', [
                 'file' => $filepath,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -247,6 +263,9 @@ class Lemme
     /**
      * Get navigation structure
      */
+    /**
+     * @return Collection<int, mixed>
+     */
     public function getNavigation(): Collection
     {
         $pages = $this->getPages();
@@ -271,6 +290,10 @@ class Lemme
 
     /**
      * Group pages by their directory structure
+     */
+    /**
+     * @param  Collection<int, \Sorane\Lemme\Data\PageData>  $pages
+     * @return array<string, mixed>
      */
     protected function groupPagesByDirectory(Collection $pages): array
     {
@@ -447,15 +470,15 @@ class Lemme
      */
     public function clearCache(): void
     {
+        $pages = Cache::get('lemme.pages');
         Cache::forget('lemme.pages');
-
-        // Clear HTML cache entries and pointers for currently known pages
-        $pages = $this->getPages();
-        foreach ($pages as $page) {
-            $cacheKey = "lemme.html.{$page['slug']}.".md5($page['modified_at']);
-            $pointerKey = "lemme.html.current.{$page['slug']}";
-            Cache::forget($cacheKey);
-            Cache::forget($pointerKey);
+        if ($pages instanceof Collection) {
+            foreach ($pages as $page) {
+                $cacheKey = "lemme.html.{$page['slug']}.{$page['modified_at']}";
+                $pointerKey = "lemme.html.current.{$page['slug']}";
+                Cache::forget($cacheKey);
+                Cache::forget($pointerKey);
+            }
         }
 
         // Clear search cache
@@ -529,26 +552,17 @@ class Lemme
     /**
      * Inject heading IDs into markdown content
      */
-    protected function injectHeadingIds(string $markdownContent, array $headings): string
+    protected function injectHeadingIdsIntoHtml(string $html): string
     {
-        $lines = explode("\n", $markdownContent);
-        $headingIndex = 0;
+        return (string) preg_replace_callback('/<h([1-6])(?![^>]*id=)([^>]*)>(.*?)<\/h\\1>/i', function ($matches) {
+            $level = $matches[1];
+            $attrs = $matches[2];
+            $inner = $matches[3];
+            $plain = strip_tags($inner);
+            $id = $this->generateHeadingId($plain);
 
-        foreach ($lines as $index => $line) {
-            // Match markdown headers (# ## ### etc.)
-            if (preg_match('/^(#{1,6})\s+(.+)$/', trim($line), $matches)) {
-                if ($headingIndex < count($headings)) {
-                    $heading = $headings[$headingIndex];
-                    // Add the ID to the heading line by converting it to HTML with an id attribute
-                    $level = strlen($matches[1]);
-                    $text = trim($matches[2]);
-                    $lines[$index] = "<h{$level} id=\"{$heading['id']}\">{$text}</h{$level}>";
-                    $headingIndex++;
-                }
-            }
-        }
-
-        return implode("\n", $lines);
+            return "<h{$level}{$attrs} id=\"{$id}\">{$inner}</h{$level}>";
+        }, $html);
     }
 
     /**
@@ -617,65 +631,13 @@ class Lemme
      */
     protected function getSearchableContent(string $content): string
     {
-        // Make content length configurable - default to no limit for comprehensive search
-        $maxLength = config('lemme.search.max_content_length', 0);
+        $maxLength = (int) config('lemme.search.max_content_length', 0);
+        $html = app(\Spatie\LaravelMarkdown\MarkdownRenderer::class)->toHtml($content);
+        $text = trim(preg_replace('/\s+/', ' ', strip_tags($html)) ?? '');
+        if ($maxLength > 0 && strlen($text) > $maxLength) {
+            return substr($text, 0, $maxLength).'...';
+        }
 
-        // Remove HTML tags that were injected for headings
-        $content = preg_replace('/<h[1-6][^>]*>(.*?)<\/h[1-6]>/', '$1', $content);
-
-        // Remove markdown formatting
-        $patterns = [
-            // Code blocks first (preserve content, remove formatting)
-            '/```[a-zA-Z]*\n?([\s\S]*?)\n?```/',  // Fenced code blocks
-            '/`([^`]+)`/',                        // Inline code
-
-            // Bold before italic (order matters!)
-            '/\*\*\*([^*]+)\*\*\*/',             // Bold italic
-            '/\*\*([^*]+)\*\*/',                 // Bold
-            '/\*([^*]+)\*/',                     // Italic
-
-            // Other formatting
-            '/~~([^~]+)~~/',                     // Strikethrough
-            '/^#{1,6}\s+/m',                     // Headers
-
-            // Links and images
-            '/!\[[^\]]*\]\([^)]*\)/',           // Images
-            '/\[([^\]]+)\]\([^)]*\)/',          // Links
-
-            // Lists and structure
-            '/^[\s]*[-*+]\s+/m',                // Unordered lists
-            '/^[\s]*\d+\.\s+/m',                // Ordered lists
-            '/^>\s*/m',                         // Blockquotes
-            '/^\|.*\|$/m',                      // Table rows
-            '/^[-:| ]+$/m',                     // Table separators
-            '/^---+$/m',                        // Horizontal rules
-        ];
-
-        $replacements = [
-            '$1',    // Code blocks - keep content
-            '$1',    // Inline code - keep content
-            '$1',    // Bold italic - keep text
-            '$1',    // Bold - keep text
-            '$1',    // Italic - keep text
-            '$1',    // Strikethrough - keep text
-            '',      // Headers - remove markup
-            '',      // Images - remove completely
-            '$1',    // Links - keep link text
-            '',      // Unordered lists - remove bullets
-            '',      // Ordered lists - remove numbers
-            '',      // Blockquotes - remove >
-            '',      // Table rows - remove (will be messy but searchable)
-            '',      // Table separators - remove
-            '',      // Horizontal rules - remove
-        ];
-
-        $content = preg_replace($patterns, $replacements, $content);
-
-        // Clean up whitespace and truncate
-        $content = preg_replace('/\s+/', ' ', trim($content));
-
-        return $maxLength > 0 && strlen($content) > $maxLength
-            ? substr($content, 0, $maxLength).'...'
-            : $content;
+        return $text;
     }
 }

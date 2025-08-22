@@ -2,7 +2,10 @@
 
 namespace Sorane\Lemme\Http\Controllers;
 
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Sorane\Lemme\Facades\Lemme;
 
@@ -11,7 +14,7 @@ class DocsController extends Controller
     /**
      * Display the documentation homepage or a specific page
      */
-    public function show(Request $request, string $slug = '')
+    public function show(Request $request, string $slug = ''): View|Response
     {
         $pages = Lemme::getPages();
 
@@ -52,7 +55,7 @@ class DocsController extends Controller
     /**
      * API endpoint to get all pages as JSON
      */
-    public function api(Request $request)
+    public function api(Request $request): JsonResponse
     {
         return response()->json([
             'pages' => Lemme::getPages(),
@@ -63,7 +66,7 @@ class DocsController extends Controller
     /**
      * API endpoint to get a specific page as JSON
      */
-    public function apiPage(Request $request, string $slug)
+    public function apiPage(Request $request, string $slug): JsonResponse
     {
         $page = Lemme::getPage($slug);
 
