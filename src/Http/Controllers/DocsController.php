@@ -16,14 +16,16 @@ class DocsController extends Controller
      */
     public function show(Request $request, string $slug = ''): View|Response
     {
-        $pages = Lemme::getPages();
-
         if (empty($slug)) {
+            $pages = Lemme::getPages();
+
             // Try to find an index page, otherwise show the first page
             $page = $pages->first(fn ($p) => $p['slug'] === '');
+
             if (! $page) {
                 $page = $pages->first();
             }
+
             $slug = $page['slug'];
         } else {
             $page = Lemme::getPage($slug);
@@ -43,7 +45,6 @@ class DocsController extends Controller
         return view('lemme::docs', [
             'page' => $page,
             'html' => $html,
-            'pages' => $pages,
             'navigation' => $navigation,
             'siteTitle' => config('lemme.site_title', 'Documentation'),
             'siteDescription' => config('lemme.site_description', 'Project Documentation'),
