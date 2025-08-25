@@ -211,6 +211,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | API Endpoints
+    |--------------------------------------------------------------------------
+    |
+    | Optional JSON API exposing documentation structure & page data.
+    | Disabled by default; enable via env when you need headless access.
+    |
+    */
+    'api' => [
+        'enabled' => env('LEMME_API_ENABLED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Logo
     |--------------------------------------------------------------------------
     |
@@ -434,9 +447,15 @@ By default, your documentation will be available at:
 
 Precedence: If both `subdomain` and `route_prefix` are set, the route prefix wins (a notice is logged) and subdomain routing is ignored.
 
-### API Access
+### API Access (Optional)
 
-Lemme provides JSON API endpoints for headless usage. Paths depend on your routing mode:
+Lemme can expose JSON API endpoints for headless usage. These are **disabled by default**. Enable them explicitly via your `.env` or config:
+
+```
+LEMME_API_ENABLED=true
+```
+
+Or set `config(['lemme.api.enabled' => true])` at runtime (e.g. inside a feature flag). Paths depend on your routing mode:
 
 | Mode | Index Endpoint | Page Endpoint |
 |------|----------------|---------------|
@@ -444,7 +463,9 @@ Lemme provides JSON API endpoints for headless usage. Paths depend on your routi
 | Custom prefix (`handbook`) | `/handbook/api` | `/handbook/api/{slug}` |
 | Subdomain (`docs.`) | `https://docs.yoursite.com/api` | `https://docs.yoursite.com/api/{slug}` |
 
-**Example use cases:**
+If disabled, hitting the endpoints returns 404 and named routes `lemme.api` / `lemme.api.page` are not registered.
+
+**Example use cases when enabled:**
 - Build custom documentation frontends
 - Create mobile apps or SPAs
 - Integrate with external tools or chatbots

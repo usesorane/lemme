@@ -7,6 +7,11 @@ beforeEach(function () {
     config()->set('lemme.subdomain', null);
     config()->set('lemme.route_prefix', 'docs');
     config()->set('lemme.cache.enabled', false);
+    config()->set('lemme.api.enabled', true);
+    // Manually (re)load routes if API routes not yet registered due to timing
+    if (! \Illuminate\Support\Facades\Route::has('lemme.api')) {
+        require __DIR__.'/../routes/web.php';
+    }
 });
 
 it('returns pages and navigation from api index', function () {

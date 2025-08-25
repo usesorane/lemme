@@ -114,6 +114,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | API Endpoints
+    |--------------------------------------------------------------------------
+    |
+    | Lemme can expose a small JSON API that returns the pages collection and
+    | individual page data. This is useful for building a completely custom
+    | frontend (SPA/mobile) or doing programmatic documentation processing.
+    |
+    | Disabled by default to avoid leaking documentation structure when you
+    | only need the rendered site. Enable explicitly via env:
+    |   LEMME_API_ENABLED=true
+    |
+    */
+    'api' => [
+        'enabled' => env('LEMME_API_ENABLED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Logo
     |--------------------------------------------------------------------------
     |
