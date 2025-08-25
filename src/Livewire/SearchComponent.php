@@ -2,6 +2,7 @@
 
 namespace Sorane\Lemme\Livewire;
 
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Sorane\Lemme\Facades\Lemme;
 
@@ -46,7 +47,7 @@ class SearchComponent extends Component
         $this->results = $results;
     }
 
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         return view('lemme::livewire.search-component');
     }

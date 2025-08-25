@@ -8,7 +8,7 @@ use Illuminate\Contracts\Support\Arrayable;
 /**
  * @implements ArrayAccess<string, mixed>
  */
-final class PageData implements Arrayable, ArrayAccess
+class PageData implements Arrayable, ArrayAccess
 {
     /**
      * @param  array<int, array{id:string,text:string,level:int,class:string}>  $headings
@@ -45,7 +45,7 @@ final class PageData implements Arrayable, ArrayAccess
     // ArrayAccess ---------------------------------------------------------
     public function offsetExists(mixed $offset): bool
     {
-        return \array_key_exists($offset, $this->toArray());
+        return array_key_exists($offset, $this->toArray());
     }
 
     public function offsetGet(mixed $offset): mixed

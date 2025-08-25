@@ -4,6 +4,8 @@ namespace Sorane\Lemme\Support;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Sorane\Lemme\Data\PageData;
+use Spatie\LaravelMarkdown\MarkdownRenderer;
 
 /**
  * Builds and caches the lightweight search index array.
@@ -13,7 +15,7 @@ class SearchIndexBuilder
     /**
      * Build and cache search data.
      *
-     * @param  Collection<int, \Sorane\Lemme\Data\PageData>  $pages
+     * @param  Collection<int, PageData>  $pages
      */
     public function buildAndCache(Collection $pages, callable $urlResolver): void
     {
@@ -24,7 +26,7 @@ class SearchIndexBuilder
     /**
      * Get search data, regenerating if needed.
      *
-     * @param  Collection<int, \Sorane\Lemme\Data\PageData>  $pages
+     * @param  Collection<int, PageData>  $pages
      * @return array<int, array<string, mixed>>
      */
     public function getSearchData(Collection $pages, callable $urlResolver): array
@@ -37,7 +39,7 @@ class SearchIndexBuilder
     }
 
     /**
-     * @param  Collection<int, \Sorane\Lemme\Data\PageData>  $pages
+     * @param  Collection<int, PageData>  $pages
      * @return array<int, array<string, mixed>>
      */
     protected function buildSearchDataFromPages(Collection $pages, callable $urlResolver): array
@@ -70,7 +72,7 @@ class SearchIndexBuilder
     protected function getSearchableContent(string $content): string
     {
         $maxLength = (int) config('lemme.search.max_content_length', 0);
-        $html = app(\Spatie\LaravelMarkdown\MarkdownRenderer::class)->toHtml($content);
+        $html = app(MarkdownRenderer::class)->toHtml($content);
         $text = trim((string) preg_replace('/\s+/', ' ', strip_tags($html)));
         if ($maxLength > 0 && strlen($text) > $maxLength) {
             return substr($text, 0, $maxLength).'...';
