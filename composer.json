@@ -25,7 +25,9 @@
         "illuminate/contracts": "^10.0||^11.0||^12.0",
         "livewire/livewire": "^3.6",
         "spatie/laravel-markdown": "^2.7",
-        "spatie/yaml-front-matter": "^2.0"
+        "spatie/yaml-front-matter": "^2.0",
+        "ext-dom": "*",
+        "ext-libxml": "*"
     },
     "require-dev": {
         "larastan/larastan": "^2.9||^3.0",

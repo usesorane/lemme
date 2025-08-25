@@ -10,6 +10,10 @@ use Sorane\Lemme\Commands\LemmeClearCommand;
 use Sorane\Lemme\Commands\LemmeInstallCommand;
 use Sorane\Lemme\Commands\LemmePublishCommand;
 use Sorane\Lemme\Commands\LemmeReindexCommand;
+use Sorane\Lemme\Support\ContentRenderer;
+use Sorane\Lemme\Support\NavigationBuilder;
+use Sorane\Lemme\Support\PageRepository;
+use Sorane\Lemme\Support\SearchIndexBuilder;
 
 class LemmeServiceProvider extends ServiceProvider
 {
@@ -18,9 +22,22 @@ class LemmeServiceProvider extends ServiceProvider
         // Merge package config
         $this->mergeConfigFrom(__DIR__.'/../config/lemme.php', 'lemme');
 
-        // Bind the Lemme class to the container and provide an alias 'lemme'
-        $this->app->singleton(\Sorane\Lemme\Lemme::class, function () {
-            return new Lemme;
+        // Core support singletons for easier customization / swapping
+        $this->app->singleton(PageRepository::class, function ($app) {
+            return new PageRepository($app->make(SearchIndexBuilder::class));
+        });
+        $this->app->singleton(ContentRenderer::class, fn () => new ContentRenderer);
+        $this->app->singleton(NavigationBuilder::class, fn () => new NavigationBuilder);
+        $this->app->singleton(SearchIndexBuilder::class, fn () => new SearchIndexBuilder);
+
+        // Bind the Lemme facade/root object
+        $this->app->singleton(\Sorane\Lemme\Lemme::class, function ($app) {
+            return new Lemme(
+                $app->make(PageRepository::class),
+                $app->make(NavigationBuilder::class),
+                $app->make(SearchIndexBuilder::class),
+                $app->make(ContentRenderer::class),
+            );
         });
 
         // Backwards compatible alias so resolve('lemme') still works
