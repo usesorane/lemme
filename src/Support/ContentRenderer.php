@@ -50,7 +50,15 @@ class ContentRenderer
     {
         $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
-        $dom->loadHTML('<div id="__lemme_root__">'.$html.'</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        // DOMDocument::loadHTML historically expects ISO-8859-1 unless entities are encoded.
+        // Without converting to HTML-ENTITIES, multibyte UTF-8 characters (emoji, box drawing) can be mangled.
+        $wrapped = '<div id="__lemme_root__">'.$html.'</div>';
+        $encoded = function_exists('mb_convert_encoding')
+            ? mb_convert_encoding($wrapped, 'HTML-ENTITIES', 'UTF-8')
+            : $wrapped; // Fallback – most environments have mbstring enabled.
+
+        $dom->loadHTML($encoded, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
         $counts = [];
         foreach (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as $tag) {

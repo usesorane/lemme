@@ -60,3 +60,15 @@ it('caches html and rotates keys when page modified', function () {
     expect($newPointer)->not->toBe($initialPointer);
     expect(Cache::has($initialPointer))->toBeFalse();
 });
+
+it('preserves utf8 characters like emoji and box drawing symbols', function () {
+    $emoji = '✨';
+    $box = '├──'; // common box drawing sequence
+    $this->docs->file('utf8.md', "---\ntitle: UTF8\n---\n# Heading {$emoji}\n\nCode:\n\n````\n{$box} path\n````\n");
+    $repo = new PageRepository(new SearchIndexBuilder);
+    $page = $repo->all()->first();
+    $renderer = new ContentRenderer;
+    $html = $renderer->render($page);
+    expect($html)->toContain($emoji)
+        ->and($html)->toContain($box);
+});
