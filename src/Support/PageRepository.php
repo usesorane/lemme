@@ -18,14 +18,16 @@ class PageRepository
     ) {}
 
     /**
-     * @return Collection<int, PageData>
+     * Get all pages keyed by their slug.
+     *
+     * @return Collection<string, PageData>
      */
     public function all(): Collection
     {
         $cacheKey = 'lemme.pages';
 
         if (config('lemme.cache.enabled') && Cache::has($cacheKey)) {
-            /** @var Collection<int, PageData> */
+            /** @var Collection<string, PageData> */
             return Cache::get($cacheKey);
         }
 
@@ -57,9 +59,13 @@ class PageRepository
             throw new \RuntimeException('Duplicate documentation slug "'.$slug.'" generated for multiple files: '.implode(', ', $files));
         }
 
+        // Re-key collection by slug for efficient direct lookup
+        $pages = $pages->keyBy('slug');
+
         if (config('lemme.cache.enabled')) {
             Cache::put($cacheKey, $pages, config('lemme.cache.ttl', 3600));
-            $this->searchIndexBuilder->buildAndCache($pages, fn ($slug) => app('lemme')->getPageUrl($slug));
+            // Search index builder expects an iterable of PageData; values() preserves order
+            $this->searchIndexBuilder->buildAndCache($pages->values(), fn ($slug) => app('lemme')->getPageUrl($slug));
         }
 
         return $pages;
@@ -67,7 +73,7 @@ class PageRepository
 
     public function findBySlug(string $slug): ?PageData
     {
-        return $this->all()->first(fn ($page) => $page['slug'] === $slug);
+        return $this->all()->get($slug);
     }
 
     public function clearCache(): void

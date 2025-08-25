@@ -47,9 +47,9 @@ class Lemme
     }
 
     /**
-     * Get all documentation pages.
+     * Get all documentation pages keyed by slug.
      *
-     * @return Collection<int, PageData>
+     * @return Collection<string, PageData>
      */
     public function getPages(): Collection
     {

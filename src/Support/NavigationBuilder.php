@@ -3,6 +3,7 @@
 namespace Sorane\Lemme\Support;
 
 use Illuminate\Support\Collection;
+use Sorane\Lemme\Data\PageData;
 
 /**
  * Builds hierarchical navigation structure from a pages collection.
@@ -12,7 +13,7 @@ class NavigationBuilder
     /**
      * Build navigation collection from pages.
      *
-     * @param  Collection<int, \Sorane\Lemme\Data\PageData>  $pages
+     * @param  Collection<string, PageData>  $pages  Pages keyed by slug (keys ignored for ordering).
      * @param  callable(string $slug): string  $urlResolver
      * @return Collection<int, mixed>
      */
@@ -35,7 +36,7 @@ class NavigationBuilder
     }
 
     /**
-     * @param  Collection<int, \Sorane\Lemme\Data\PageData>  $pages
+     * @param  Collection<string, PageData>  $pages
      * @return array<string, mixed>
      */
     protected function groupPagesByDirectory(Collection $pages): array
@@ -52,20 +53,35 @@ class NavigationBuilder
                 continue;
             }
 
-            $current = &$grouped;
-            foreach ($pathParts as $dir) {
-                if (! isset($current[$dir])) {
-                    $current[$dir] = [];
-                }
-                $current = &$current[$dir];
-            }
-            if (! isset($current['_pages'])) {
-                $current['_pages'] = [];
-            }
-            $current['_pages'][] = $page;
+            $grouped = $this->insertPageIntoTree($grouped, $pathParts, $page);
         }
 
         return $grouped;
+    }
+
+    /**
+     * Recursively insert a page into the navigation tree without using references.
+     *
+     * @param  array<string,mixed>  $tree
+     * @param  array<int,string>  $dirs
+     * @return array<string,mixed>
+     */
+    protected function insertPageIntoTree(array $tree, array $dirs, PageData|array $page): array
+    {
+        if (empty($dirs)) {
+            if (! isset($tree['_pages'])) {
+                $tree['_pages'] = [];
+            }
+            $tree['_pages'][] = $page;
+
+            return $tree;
+        }
+
+        $dir = array_shift($dirs);
+        $subtree = $tree[$dir] ?? [];
+        $tree[$dir] = $this->insertPageIntoTree($subtree, $dirs, $page);
+
+        return $tree;
     }
 
     protected function buildNavigationTree(array $grouped, callable $urlResolver): Collection
