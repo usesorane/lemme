@@ -42,13 +42,6 @@ Install the package via Composer:
 composer require usesorane/lemme
 ```
 
-Publish the config and assets:
-
-```bash
-php artisan vendor:publish --tag="lemme-config"
-php artisan vendor:publish --tag="lemme-assets"
-```
-
 Install the documentation system:
 
 ```bash
