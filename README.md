@@ -13,7 +13,7 @@ Lemme is a Laravel package that facilitates the creation of beautiful documentat
 
 ## Table of Contents
 
-- [Be up and running in just a few minutes!](#be-up-and-running-in-just-a-few-minutes)
+- [Quick Start](#quick-start)
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -43,7 +43,7 @@ Lemme is a Laravel package that facilitates the creation of beautiful documentat
 - [License](#license)
 - [Credits](#credits)
 
-## Be up and running in just a few minutes!
+## Quick Start
 Lemme makes it super easy to create and maintain documentation for your Laravel projects.
 
 Just run `php artisan lemme:install`, write your docs in the `docs/` folder and your documentation site is ready!
