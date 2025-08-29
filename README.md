@@ -11,6 +11,38 @@ Lemme is a Laravel package that facilitates the creation of beautiful documentat
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/usesorane/lemme.svg?style=flat-square)](https://packagist.org/packages/usesorane/lemme)
 
+## Table of Contents
+
+- [Be up and running in just a few minutes!](#be-up-and-running-in-just-a-few-minutes)
+- [Features](#features)
+- [Installation](#installation)
+- [Configuration](#configuration)
+    - [Logo Customization](#logo-customization)
+- [Usage](#usage)
+    - [Creating Documentation](#creating-documentation)
+        - [Slug Configuration](#slug-configuration)
+            - [Index Pages & Nested Index Behavior](#index-pages--nested-index-behavior)
+            - [Duplicate Slug Handling](#duplicate-slug-handling)
+            - [Quick Reference Summary](#quick-reference-summary)
+    - [Directory-based Navigation Grouping](#directory-based-navigation-grouping)
+    - [Accessing Documentation](#accessing-documentation)
+    - [API Access (Optional)](#api-access-optional)
+    - [Commands](#commands)
+    - [Publishing Assets / Views / Config](#publishing-assets--views--config)
+    - [Cache & Reindex Details](#cache--reindex-details)
+    - [Heading Anchors](#heading-anchors)
+    - [Search Index](#search-index)
+    - [Troubleshooting Slugs](#troubleshooting-slugs)
+    - [Using the Facade](#using-the-facade)
+- [Themes](#themes)
+- [Performance](#performance)
+- [Subdomain Setup (Optional)](#subdomain-setup-optional)
+- [Development](#development)
+    - [Building Assets](#building-assets)
+- [Contributing](#contributing)
+- [License](#license)
+- [Credits](#credits)
+
 ## Be up and running in just a few minutes!
 Lemme makes it super easy to create and maintain documentation for your Laravel projects.
 
@@ -20,17 +52,17 @@ It's really that simple. And totally free.
 
 ## Features
 
-- 📝 **Markdown-based**: Write your documentation in simple Markdown files inside the `docs/` directory in your project
-- 🎨 **Beautiful UI**: Modern design (Tailwind CSS 4 + dark mode) out of the box
-- 📱 **Responsive**: Works on all devices
-- ⚡ **Fast**: Built-in caching (pages, HTML, search) with rotation
-- 🎯 **Flexible routing**: Serve via route prefix (default) or a subdomain
-- 🔧 **Configurable**: Directories, navigation sorting/grouping, logo rendering, search limits
-- 🚀 **Laravel-native**: Service provider, facade, Livewire component
-- ✨ **Syntax highlighting**: Shiki-driven code highlighting (light & dark themes)
-- 📁 **Directory grouping**: Automatic navigation tree from folder structure
-- 🔍 **Search-ready**: Plain‑text index built from rendered Markdown
-- 🧭 **Anchors**: Stable heading IDs with automatic de‑duplication
+- **Markdown-based**: Write your documentation in simple Markdown files inside the `docs/` directory in your project
+- **Beautiful UI**: Modern design (Tailwind CSS 4 + dark mode) out of the box
+- **Responsive**: Works on all devices
+- **Fast**: Built-in caching (pages, HTML, search) with rotation
+- **Flexible routing**: Serve via route prefix (default) or a subdomain
+- **Configurable**: Directories, navigation sorting/grouping, logo rendering, search limits
+- **Laravel-native**: Service provider, facade, Livewire component
+- **Syntax highlighting**: Shiki-driven code highlighting (light & dark themes)
+- **Directory grouping**: Automatic navigation tree from folder structure
+- **Search-ready**: Plain‑text index built from rendered Markdown
+- **Anchors**: Stable heading IDs with automatic de‑duplication
 
 > Note: The `theme` config key is currently a placeholder (only the bundled default + dark mode variant ships). Extra named themes are not yet implemented.
 
