@@ -3,6 +3,7 @@
 namespace Sorane\Lemme\Livewire;
 
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Sorane\Lemme\Facades\Lemme;
 
@@ -13,16 +14,12 @@ class SearchComponent extends Component
     /** @var array<int, mixed> */
     public array $results = [];
 
-    protected $listeners = [
-        'init-search-data' => 'initSearchData',
-        'search-results' => 'handleSearchResults',
-    ];
-
     public function mount(): void
     {
         $this->initSearchData();
     }
 
+    #[On('init-search-data')]
     public function initSearchData(): void
     {
         $searchData = Lemme::getSearchData();
@@ -42,7 +39,8 @@ class SearchComponent extends Component
         $this->dispatch('perform-search', query: trim($this->search));
     }
 
-    public function handleSearchResults($results): void
+    #[On('search-results')]
+    public function handleSearchResults(array $results): void
     {
         $this->results = $results;
     }
